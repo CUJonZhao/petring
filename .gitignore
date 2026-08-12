@@ -1,0 +1,32 @@
+# Local/runtime artifacts
+tmp/
+*.log
+*.tmp
+
+# Experiment data can become large or private; keep folder markers only.
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Embedded/build artifacts
+.pio/
+build/
+dist/
+
+# Environment and machine-local config
+.env
+.env.*
+secrets.*
+wifi_config.*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
