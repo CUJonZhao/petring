@@ -54,8 +54,8 @@ Amazon:
 
 ## Mechanical Notes
 
-- Use the 70 x 42 x 23 mm project box for Stage 1; it is large enough for ESP32 Feather, battery, IMU, and wiring.
-- Smaller 60 x 36 x 17 mm project boxes are likely too tight for the ESP32 Feather plus battery.
+- The original 70 x 42 x 23 mm project box is too tight for a safe flat layout containing the ESP32 Feather, LiPo, IMU, and wiring. Do not force or stack parts inside it.
+- Use the larger 90 x 70 x 28 mm external-dimension project box selected after the first dry fit. Verify its usable internal dimensions and lid clearance before assembly.
 - Place adhesive foam on the box side facing Delta/collar; do not put adhesive directly on fur or skin.
 - Use hook-and-loop straps around the collar/module so the assembly is removable and adjustable.
 - Keep the hard strap head away from the dog-facing side.

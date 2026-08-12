@@ -247,7 +247,7 @@ def draw_page(canvas, doc):
 
 def main():
     parser = argparse.ArgumentParser(description="Build a proposal PDF from a simple Markdown source.")
-    parser.add_argument("source", nargs="?", default="canine_resting_vitals_smart_collar_proposal_v2.md")
+    parser.add_argument("source", nargs="?", default="canine_resting_vitals_smart_collar_proposal_v3_delta_first.md")
     parser.add_argument("output", nargs="?", default=None)
     parser.add_argument("--header", default="Canine Resting Vitals Smart Collar - Proposal")
     parser.add_argument("--title", default="Canine Resting Vitals Smart Collar Proposal")
