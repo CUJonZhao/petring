@@ -31,6 +31,8 @@ Stage 1 intentionally does not include medical diagnosis, production waterproofi
 - `docs/canine_resting_vitals_smart_collar_proposal_v3_delta_first.md`
 - `docs/canine_resting_vitals_smart_collar_proposal_v3_delta_first.pdf`
 - `docs/stage1_purchase_and_build_notes.md`
+- `docs/2026-08-12_stage1_handoff.md`
+- `docs/2026-08-14_stage1_enclosure_bench_and_calibration.md`
 
 ## Safety Note
 
