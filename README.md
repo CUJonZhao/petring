@@ -6,16 +6,35 @@ The current engineering goal is Stage 1: build a comfortable wearable prototype 
 
 ## Current Stage
 
-Stage 1 focuses on:
+Current status: Stage 1B bench and miniaturization preparation.
 
-- ESP32 Feather/HUZZAH32 V2 as the controller.
-- Adafruit LSM6DSOX IMU as the primary motion sensor.
-- 3.7 V 500 mAh Adafruit LiPo battery for untethered testing.
-- Wi-Fi streaming to a local browser dashboard.
-- CSV logging for short experiments of a few hours.
-- Comfort-first collar mounting using a small project box, foam padding, and removable hook-and-loop straps.
+Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
+LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
+enclosed battery-only bench test, and four-minute hand-motion calibration have
+all passed. The first dog-worn test is intentionally deferred because the
+current enclosure is larger than desired for Delta.
+
+Stage 1B focuses on:
+
+- Longer battery-only bench runtime testing.
+- Full-resolution data capture and automatic summary plots.
+- Activity/rest threshold review from repeatable bench and hand-motion tests.
+- Smaller 3D-printable enclosure planning.
+- Dog-worn testing only after the smaller enclosure passes dry fit, enclosed
+  USB, enclosed battery, and motion calibration checks.
 
 Stage 1 intentionally does not include medical diagnosis, production waterproofing, phone app deployment, GPS/LTE, or validated heart/respiration measurement.
+
+## Next Work
+
+Recommended next steps:
+
+1. Run a 1-hour battery-only bench runtime test with full CSV capture.
+2. Add or use tooling that saves complete test data and generates plots.
+3. Measure the Feather, LiPo, IMU, JST switch, cable bends, and collar geometry
+   for a smaller 3D-printed enclosure.
+4. Draft the first smaller enclosure concept with flat LiPo placement, cable
+   strain relief, accessible switch, and a soft dog-facing side.
 
 ## Repository Layout
 
