@@ -28,6 +28,17 @@ Reference photo:
 
 - `hardware/reference_images/stage1_enclosure_internal_wiring_2026-08-14.jpg`
 
+Summary figure:
+
+- `docs/figures/stage1_enclosure_bench_summary_2026-08-14.svg`
+
+The summary figure was generated from 30-second monitor summaries and phase
+summaries captured during testing. Raw per-sample CSV was not saved for this
+session, so the figure should be treated as a trend summary rather than a
+full-resolution data trace.
+
+![Stage 1 enclosure bench summary](figures/stage1_enclosure_bench_summary_2026-08-14.svg)
+
 Observed layout:
 
 - ESP32 Feather/HUZZAH32 V2 mounted in the larger enclosure with USB-C near the

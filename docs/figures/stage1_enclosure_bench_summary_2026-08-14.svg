@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="980" viewBox="0 0 1200 980">
+<rect width="1200" height="980" fill="#ffffff"/>
+<text x="36" y="44" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" text-anchor="start" fill="#1d2a2c">Delta Collar Stage 1 Enclosure Tests - 2026-08-14</text>
+<text x="36" y="72" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start" fill="#52615f">Summary-derived figure: 30-second monitor summaries and phase summaries; raw per-sample CSV was not saved.</text>
+<text x="48" y="107" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" text-anchor="start" fill="#1d2a2c">Enclosed Bench Temperature Trend</text>
+<line x1="120.0" y1="135.0" x2="1124.0" y2="135.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="140.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">42.00</text>
+<line x1="120.0" y1="176.5" x2="1124.0" y2="176.5" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="181.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">38.75</text>
+<line x1="120.0" y1="218.0" x2="1124.0" y2="218.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="223.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">35.50</text>
+<line x1="120.0" y1="259.5" x2="1124.0" y2="259.5" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="264.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">32.25</text>
+<line x1="120.0" y1="301.0" x2="1124.0" y2="301.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="306.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">29.00</text>
+<line x1="120.0" y1="135.0" x2="120.0" y2="301.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="120.0" y="325" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">0</text>
+<line x1="320.8" y1="135.0" x2="320.8" y2="301.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="320.8" y="325" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">3</text>
+<line x1="521.6" y1="135.0" x2="521.6" y2="301.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="521.6" y="325" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">6</text>
+<line x1="722.4" y1="135.0" x2="722.4" y2="301.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="722.4" y="325" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">9</text>
+<line x1="923.2" y1="135.0" x2="923.2" y2="301.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="923.2" y="325" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">12</text>
+<line x1="1124.0" y1="135.0" x2="1124.0" y2="301.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="1124.0" y="325" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">15</text>
+<line x1="120.0" y1="301.0" x2="1124.0" y2="301.0" stroke="#33413f" stroke-width="1.4"/>
+<line x1="120.0" y1="135.0" x2="120.0" y2="301.0" stroke="#33413f" stroke-width="1.4"/>
+<text x="622.0" y="347" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#52615f">Elapsed time (min)</text>
+<text x="56" y="218.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#52615f">IMU temp (C)</text>
+<polyline points="153.5,155.3 186.9,161.2 220.4,167.3 253.9,173.6 287.3,179.3 320.8,184.7 354.3,189.8 387.7,194.9 421.2,199.5 454.7,202.4 488.1,204.7 521.6,207.3 555.1,210.2 588.5,213.1 622.0,215.7 655.5,217.5 688.9,219.0 722.4,220.0 755.9,220.7 789.3,221.8 822.8,223.7 856.3,225.8 889.7,227.8 923.2,229.4 956.7,230.5 990.1,231.5 1023.6,232.6 1057.1,233.6 1090.5,234.7 1124.0,234.9" fill="none" stroke="#1f6f8b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="153.5" cy="155.3" r="3.2" fill="#1f6f8b"/>
+<circle cx="253.9" cy="173.6" r="3.2" fill="#1f6f8b"/>
+<circle cx="354.3" cy="189.8" r="3.2" fill="#1f6f8b"/>
+<circle cx="454.7" cy="202.4" r="3.2" fill="#1f6f8b"/>
+<circle cx="555.1" cy="210.2" r="3.2" fill="#1f6f8b"/>
+<circle cx="655.5" cy="217.5" r="3.2" fill="#1f6f8b"/>
+<circle cx="755.9" cy="220.7" r="3.2" fill="#1f6f8b"/>
+<circle cx="856.3" cy="225.8" r="3.2" fill="#1f6f8b"/>
+<circle cx="956.7" cy="230.5" r="3.2" fill="#1f6f8b"/>
+<circle cx="1057.1" cy="233.6" r="3.2" fill="#1f6f8b"/>
+<polyline points="153.5,280.4 186.9,278.5 220.4,276.5 253.9,275.8 287.3,275.6 320.8,275.7 354.3,276.2 387.7,277.4 421.2,278.8 454.7,279.5 488.1,279.4 521.6,279.2 555.1,279.4 588.5,280.6 622.0,281.7 655.5,283.0 688.9,283.0 722.4,281.7 755.9,280.2 789.3,279.4 822.8,279.5 856.3,280.1 889.7,280.7 923.2,281.3 956.7,281.6 990.1,282.4 1023.6,282.4 1057.1,282.1 1090.5,282.1 1124.0,282.1" fill="none" stroke="#c65d32" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="153.5" cy="280.4" r="3.2" fill="#c65d32"/>
+<circle cx="253.9" cy="275.8" r="3.2" fill="#c65d32"/>
+<circle cx="354.3" cy="276.2" r="3.2" fill="#c65d32"/>
+<circle cx="454.7" cy="279.5" r="3.2" fill="#c65d32"/>
+<circle cx="555.1" cy="279.4" r="3.2" fill="#c65d32"/>
+<circle cx="655.5" cy="283.0" r="3.2" fill="#c65d32"/>
+<circle cx="755.9" cy="280.2" r="3.2" fill="#c65d32"/>
+<circle cx="856.3" cy="280.1" r="3.2" fill="#c65d32"/>
+<circle cx="956.7" cy="281.6" r="3.2" fill="#c65d32"/>
+<circle cx="1057.1" cy="282.1" r="3.2" fill="#c65d32"/>
+<line x1="894.0" y1="98.0" x2="922.0" y2="98.0" stroke="#1f6f8b" stroke-width="3"/>
+<text x="930" y="103" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">USB enclosed</text>
+<line x1="1016.0" y1="98.0" x2="1044.0" y2="98.0" stroke="#c65d32" stroke-width="3"/>
+<text x="1052" y="103" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">Battery enclosed</text>
+<text x="48" y="402" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" text-anchor="start" fill="#1d2a2c">Battery Voltage Trend</text>
+<line x1="120.0" y1="430.0" x2="1124.0" y2="430.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="435.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">4.23</text>
+<line x1="120.0" y1="471.5" x2="1124.0" y2="471.5" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="476.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">4.15</text>
+<line x1="120.0" y1="513.0" x2="1124.0" y2="513.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="518.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">4.07</text>
+<line x1="120.0" y1="554.5" x2="1124.0" y2="554.5" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="559.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">3.98</text>
+<line x1="120.0" y1="596.0" x2="1124.0" y2="596.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="601.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">3.90</text>
+<line x1="120.0" y1="430.0" x2="120.0" y2="596.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="120.0" y="620" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">0</text>
+<line x1="320.8" y1="430.0" x2="320.8" y2="596.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="320.8" y="620" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">3</text>
+<line x1="521.6" y1="430.0" x2="521.6" y2="596.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="521.6" y="620" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">6</text>
+<line x1="722.4" y1="430.0" x2="722.4" y2="596.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="722.4" y="620" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">9</text>
+<line x1="923.2" y1="430.0" x2="923.2" y2="596.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="923.2" y="620" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">12</text>
+<line x1="1124.0" y1="430.0" x2="1124.0" y2="596.0" stroke="#d7dfdc" stroke-width="0.8"/>
+<text x="1124.0" y="620" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#52615f">15</text>
+<line x1="120.0" y1="596.0" x2="1124.0" y2="596.0" stroke="#33413f" stroke-width="1.4"/>
+<line x1="120.0" y1="430.0" x2="120.0" y2="596.0" stroke="#33413f" stroke-width="1.4"/>
+<text x="622.0" y="642" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#52615f">Elapsed time (min)</text>
+<text x="56" y="513.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#52615f">battery_v (V)</text>
+<polyline points="153.5,443.1 186.9,443.1 220.4,443.6 253.9,444.1 287.3,444.1 320.8,443.1 354.3,444.1 387.7,444.6 421.2,444.1 454.7,444.1 488.1,445.1 521.6,444.6 555.1,445.6 588.5,445.6 622.0,445.1 655.5,445.6 688.9,445.6 722.4,445.6 755.9,445.6 789.3,446.1 822.8,446.6 856.3,446.6 889.7,446.6 923.2,446.6 956.7,447.6 990.1,447.1 1023.6,447.1 1057.1,447.1 1090.5,448.1 1124.0,447.6" fill="none" stroke="#1f6f8b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="153.5" cy="443.1" r="3.2" fill="#1f6f8b"/>
+<circle cx="253.9" cy="444.1" r="3.2" fill="#1f6f8b"/>
+<circle cx="354.3" cy="444.1" r="3.2" fill="#1f6f8b"/>
+<circle cx="454.7" cy="444.1" r="3.2" fill="#1f6f8b"/>
+<circle cx="555.1" cy="445.6" r="3.2" fill="#1f6f8b"/>
+<circle cx="655.5" cy="445.6" r="3.2" fill="#1f6f8b"/>
+<circle cx="755.9" cy="445.6" r="3.2" fill="#1f6f8b"/>
+<circle cx="856.3" cy="446.6" r="3.2" fill="#1f6f8b"/>
+<circle cx="956.7" cy="447.6" r="3.2" fill="#1f6f8b"/>
+<circle cx="1057.1" cy="447.1" r="3.2" fill="#1f6f8b"/>
+<polyline points="153.5,549.2 186.9,550.7 220.4,556.8 253.9,555.3 287.3,554.8 320.8,555.3 354.3,560.8 387.7,561.3 421.2,560.3 454.7,561.3 488.1,560.8 521.6,562.8 555.1,565.3 588.5,564.8 622.0,565.3 655.5,565.8 688.9,568.8 722.4,572.4 755.9,564.8 789.3,565.8 822.8,565.8 856.3,570.3 889.7,573.9 923.2,572.4 956.7,574.4 990.1,575.9 1023.6,580.9 1057.1,579.4 1090.5,574.4 1124.0,588.0" fill="none" stroke="#c65d32" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="153.5" cy="549.2" r="3.2" fill="#c65d32"/>
+<circle cx="253.9" cy="555.3" r="3.2" fill="#c65d32"/>
+<circle cx="354.3" cy="560.8" r="3.2" fill="#c65d32"/>
+<circle cx="454.7" cy="561.3" r="3.2" fill="#c65d32"/>
+<circle cx="555.1" cy="565.3" r="3.2" fill="#c65d32"/>
+<circle cx="655.5" cy="565.8" r="3.2" fill="#c65d32"/>
+<circle cx="755.9" cy="564.8" r="3.2" fill="#c65d32"/>
+<circle cx="856.3" cy="570.3" r="3.2" fill="#c65d32"/>
+<circle cx="956.7" cy="574.4" r="3.2" fill="#c65d32"/>
+<circle cx="1057.1" cy="579.4" r="3.2" fill="#c65d32"/>
+<line x1="894.0" y1="393.0" x2="922.0" y2="393.0" stroke="#1f6f8b" stroke-width="3"/>
+<text x="930" y="398" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">USB enclosed</text>
+<line x1="1016.0" y1="393.0" x2="1044.0" y2="393.0" stroke="#c65d32" stroke-width="3"/>
+<text x="1052" y="398" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">Battery enclosed</text>
+<text x="48" y="697" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" text-anchor="start" fill="#1d2a2c">Four-Minute Motion Calibration Summary</text>
+<line x1="120.0" y1="725.0" x2="1076.0" y2="725.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="730.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">0.8</text>
+<line x1="120.0" y1="759.5" x2="1076.0" y2="759.5" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="764.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">0.6</text>
+<line x1="120.0" y1="794.0" x2="1076.0" y2="794.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="799.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">0.4</text>
+<line x1="120.0" y1="828.5" x2="1076.0" y2="828.5" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="833.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">0.2</text>
+<line x1="120.0" y1="863.0" x2="1076.0" y2="863.0" stroke="#d7dfdc" stroke-width="1"/>
+<text x="108" y="868.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#52615f">0.0</text>
+<line x1="120.0" y1="863.0" x2="1076.0" y2="863.0" stroke="#33413f" stroke-width="1.4"/>
+<line x1="120.0" y1="725.0" x2="120.0" y2="863.0" stroke="#33413f" stroke-width="1.4"/>
+<text x="70" y="794.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#52615f">Activity score</text>
+<line x1="1076.0" y1="725.0" x2="1076.0" y2="863.0" stroke="#33413f" stroke-width="1.4"/>
+<text x="1088" y="730.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#52615f">350</text>
+<text x="1088" y="764.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#52615f">262</text>
+<text x="1088" y="799.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#52615f">175</text>
+<text x="1088" y="833.5" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#52615f">88</text>
+<text x="1088" y="868.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#52615f">0</text>
+<text x="1126" y="794.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#52615f">Gyro dps</text>
+<rect x="221.3" y="859.2" width="26.0" height="3.8" fill="#2f7d5c"/>
+<rect x="251.3" y="858.9" width="26.0" height="4.1" fill="#96b85c"/>
+<rect x="281.3" y="862.8" width="26.0" height="0.2" fill="#6c6f93"/>
+<rect x="311.3" y="862.8" width="26.0" height="0.2" fill="#b76e79"/>
+<text x="279.33333333333337" y="891" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1d2a2c">Still</text>
+<rect x="540.0" y="831.4" width="26.0" height="31.6" fill="#2f7d5c"/>
+<rect x="570.0" y="756.9" width="26.0" height="106.1" fill="#96b85c"/>
+<rect x="600.0" y="851.8" width="26.0" height="11.2" fill="#6c6f93"/>
+<rect x="630.0" y="805.4" width="26.0" height="57.6" fill="#b76e79"/>
+<text x="598.0" y="891" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1d2a2c">Hand move</text>
+<rect x="858.7" y="806.0" width="26.0" height="57.0" fill="#2f7d5c"/>
+<rect x="888.7" y="725.2" width="26.0" height="137.8" fill="#96b85c"/>
+<rect x="918.7" y="833.4" width="26.0" height="29.6" fill="#6c6f93"/>
+<rect x="948.7" y="734.9" width="26.0" height="128.1" fill="#b76e79"/>
+<text x="916.6666666666667" y="891" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1d2a2c">Turn/stop</text>
+<rect x="120.0" y="900.0" width="18.0" height="12.0" fill="#2f7d5c"/>
+<text x="146" y="913" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">Activity avg</text>
+<rect x="290.0" y="900.0" width="18.0" height="12.0" fill="#96b85c"/>
+<text x="316" y="913" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">Activity max</text>
+<rect x="460.0" y="900.0" width="18.0" height="12.0" fill="#6c6f93"/>
+<text x="486" y="913" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">Gyro avg</text>
+<rect x="630.0" y="900.0" width="18.0" height="12.0" fill="#b76e79"/>
+<text x="656" y="913" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#52615f">Gyro max</text>
+</svg>
