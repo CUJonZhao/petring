@@ -1,0 +1,121 @@
+<div id="collar-routing-v04">
+  <div class="viz-controls" aria-label="显示线路">
+    <button class="btn" type="button" data-mode="placement" aria-pressed="false">只看摆放</button>
+    <button class="btn" type="button" data-mode="imu" aria-pressed="false">IMU 线</button>
+    <button class="btn" type="button" data-mode="power" aria-pressed="false">开关电源线</button>
+    <button class="btn" type="button" data-mode="all" aria-pressed="true">全部</button>
+  </div>
+  <div class="viz-row text-small" aria-label="图例">
+    <span><span class="route-key imu-key"></span>IMU 四色线</span>
+    <span><span class="route-key power-key"></span>电源线：实线去开关，虚线回 Feather</span>
+  </div>
+  <svg class="layout" role="img" aria-label="v0.4 俯视摆放与走线：USB 在左，Feather 在上，电池在左下，双柱理线座在右下，开关放盒外。每条电源路线代表一组红黑线。"></svg>
+  <div class="text-small" aria-live="polite" data-detail>v0.4 俯视｜零件占地按尺寸；接头位置与线弯为示意。</div>
+</div>
+<style>
+  #collar-routing-v04 .layout { display:block; width:100%; overflow:visible; }
+  #collar-routing-v04 .layout text { fill:var(--foreground); font-weight:400; }
+  #collar-routing-v04 .layout .secondary { fill:var(--muted-foreground); }
+  #collar-routing-v04 .route-key { display:inline-block; width:1.6em; vertical-align:middle; margin-right:.4em; border-top:3px solid; }
+  #collar-routing-v04 .imu-key { border-color:var(--viz-series-1); }
+  #collar-routing-v04 .power-key { border-color:var(--viz-series-2); }
+  #collar-routing-v04 .structural { stroke:var(--border); stroke-width:1.5; }
+  #collar-routing-v04 .casing { fill:var(--muted); }
+  #collar-routing-v04 .cavity { fill:var(--background); }
+  #collar-routing-v04 .board { fill:color-mix(in srgb,var(--green) 14%,var(--background)); }
+  #collar-routing-v04 .battery { fill:color-mix(in srgb,var(--orange) 16%,var(--background)); }
+  #collar-routing-v04 .guide { fill:color-mix(in srgb,var(--blue) 12%,var(--background)); }
+  #collar-routing-v04 .connector { fill:var(--secondary); stroke:var(--foreground); stroke-width:1; }
+  #collar-routing-v04 .underboard { fill:none; stroke:var(--muted-foreground); stroke-width:1; stroke-dasharray:5 4; }
+  #collar-routing-v04 .imu-route { stroke:var(--viz-series-1); }
+  #collar-routing-v04 .power-route { stroke:var(--viz-series-2); }
+  #collar-routing-v04 .route { fill:none; stroke-width:3; stroke-linejoin:round; stroke-linecap:round; }
+  #collar-routing-v04 .return-route { stroke-dasharray:7 4; }
+  #collar-routing-v04 .leader { fill:none; stroke:var(--muted-foreground); stroke-width:1; }
+  #collar-routing-v04 .small-dot { fill:var(--background); stroke:var(--foreground); stroke-width:1; }
+</style>
+<script>
+(() => {
+  const root=document.getElementById('collar-routing-v04');
+  const svg=root.querySelector('.layout');
+  const detail=root.querySelector('[data-detail]');
+  const ns='http://www.w3.org/2000/svg';
+  const config={base:65.25,wall:1.6,board:[4.08,3.6,51.57,22.8],battery:[3.6,29.4,35.9,32.25],guide:[42,28,20,27],holes:[[6.935,6.165],[6.935,23.835],[52.97,6.2],[52.97,23.8]],posts:[[52,34.5],[52,48.5]],jstOverhang:1.06};
+  let mode='all';
+  let width,scale,pad,top,fontSize;
+  function el(tag,attrs={},parent=svg){const n=document.createElementNS(ns,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;}
+  function px(x){return pad+(x+6)*scale;}
+  function py(y){return top+y*scale;}
+  function label(x,y,t,extra={}){const n=el('text',{x:px(x),y:py(y),'text-anchor':'middle','dominant-baseline':'middle',...extra});n.textContent=t;return n;}
+  function rect(x,y,w,h,klass,r=1,parent=svg){return el('rect',{x:px(x),y:py(y),width:w*scale,height:h*scale,rx:r*scale,class:klass},parent);}
+  function circle(x,y,r,klass,parent=svg){return el('circle',{cx:px(x),cy:py(y),r:r*scale,class:klass},parent);}
+  function path(commands,klass,parent=svg){let p='';for(const row of commands){p+=row[0]+' ';for(let i=1;i<row.length;i+=2)p+=px(row[i])+','+py(row[i+1])+' ';}return el('path',{d:p,class:klass},parent);}
+  function route(commands,klass,parent){const p=path(commands,'route '+klass,parent);p.setAttribute('data-cable-route','true');return p;}
+  function render(){
+    width=Math.max(300,Math.floor(root.getBoundingClientRect().width));
+    scale=(width-24)/83;pad=12;top=38;fontSize=parseFloat(getComputedStyle(root).fontSize)||14;
+    svg.setAttribute('viewBox',`0 0 ${width} ${Math.ceil(top+88*scale)}`);
+    svg.setAttribute('height',Math.ceil(top+88*scale));svg.replaceChildren();
+    const title=el('title');title.textContent='v0.4：俯视摆放与松绕线示意';
+    label(32.625,-2.7,'Feather 在上 · USB 缺口在左');
+    rect(0,0,config.base,config.base,'casing structural',4);
+    rect(1.6,1.6,62.05,62.05,'cavity structural',2.4);
+    // Actual v0.4 wall openings; wire slot is on the right at Y = 41.5.
+    rect(-.1,9.925,1.9,10.15,'cavity',0);
+    rect(63.6,39.24,1.8,4.52,'cavity',0);
+    rect(...config.board,'board structural',1.4);
+    rect(3.6,10.6,6.2,8.8,'connector',.6);
+    rect(-4.4,13.35,8,3.3,'connector',.5);
+    label(-2.6,22.8,'USB',{'text-anchor':'middle'});
+    // IMU's footprint is illustrative: it stays in its present underside fit.
+    rect(30.14,6.1,25.51,17.82,'underboard',1);
+    label(29.5,17,'Feather');
+    label(44.5,13.8,'IMU 在背面',{'class':'secondary'});
+    for(const[x,y]of config.holes){circle(x,y,2,'connector');circle(x,y,.8,'cavity');}
+    // Connection markers identify existing plugs, not new soldering positions.
+    rect(10.7,3.6,8,5,'connector',.4);
+    rect(12,3.6-config.jstOverhang,5.4,config.jstOverhang+1.6,'connector',.3);
+    rect(31.5,8.6,4.6,4.1,'connector',.4);
+    rect(54.2,12.8,2.4,4.6,'connector',.3);
+    rect(...config.battery,'battery structural',1);
+    label(21.55,44,'电池');
+    label(21.55,48.8,'35.90 × 32.25',{'class':'secondary'});
+    rect(...config.guide,'guide structural',2);
+    for(const[x,y]of config.posts){circle(x,y,6,'casing structural');circle(x,y,5,'guide structural');}
+    label(52,34.5,'A');label(52,48.5,'B');
+    label(51.5,59,width<480?'理线座 27 mm':'20 × 27 mm 理线座');
+    // A small hard plug/coupler stays above the board/cell lane, not under the cell.
+    rect(33,27.0,5.8,3.0,'connector',.4);
+    const imu=el('g',{'data-layer':'imu'});
+    const power=el('g',{'data-layer':'power'});
+    const showImu=mode==='all'||mode==='imu';
+    const showPower=mode==='all'||mode==='power';
+    imu.style.display=showImu?'':'none';power.style.display=showPower?'':'none';
+    // Gentle loop above the board/right spare space; cable length is NOT modeled.
+    route([['M',33.8,10.6],['C',38,10.6,39,8.0,45,8.0],['C',53,8,61,7.5,61,15.5],['C',61,22,60,27.8,52,27.8],['C',46,27.8,42,26,42,21.8],['C',42,17,49,16.1,55.6,15.1]],'imu-route',imu);
+    // Power A: existing battery plug -> around outside of both posts -> switch.
+    route([['M',35.5,30.3],['C',35.5,33,38.5,31,38.5,28.5],['C',41,27.5,48,25.0,48.1,28],['C',44.5,30,44.5,32,44.5,34.5],['L',44.5,48.5],['C',44.5,52.65,47.85,56,52,56],['C',56.15,56,59.5,52.65,59.5,48.5],['L',59.5,44.5],['C',59.5,42.3,62,42.2,65.25,42.2],['C',71,42.2,70,56,70,64],['C',70,74,63,77,58,77]],'power-route',power);
+    // Power B: switch return -> right lane -> board/cell lane -> raised JST bend.
+    route([['M',45,77],['C',40,77,39,70,51,69],['C',68,69,74,66,74,56],['C',74,45,71,40.6,65.25,40.6],['C',62,40.6,62,35,62,31],['C',62,28,58,27.6,55,27.6],['L',24,27.6],['C',20,27.6,20,23,20,18],['L',20,9],['C',20,5,14.7,6.5,14.7,2.54]],'power-route return-route',power);
+    // Draw the exterior switch above cable endpoints; position is symbolic.
+    rect(43,72.8,17,8.4,'casing structural',2);
+    label(51.5,77,width<480?'开关':'盒外开关');
+    if(width<480){label(28,74.5,'外部余线',{'class':'secondary'});label(27,78.8,'用魔术贴收拢',{'class':'secondary'});}
+    else{label(30,76.3,'外部余线',{'class':'secondary'});label(30,79.2,'用已有魔术贴收拢',{'class':'secondary'});}
+    // Leaders and annotations keep wiring topology separate from physical scale.
+    path([['M',65.5,39.2],['L',70.2,34.0]],'leader');
+    label(69.5,31,width<480?'出线槽':'开关出线槽');
+    if(showPower){
+      path([['M',14.7,3.0],['L',20,1.5],['L',30,1.5]],'leader');
+      label(38,1.5,width<480?'JST 抬起回弯':'JST 线抬起向板上回弯');
+      label(51.8,62.1,width<480?'绕外侧':'外侧松绕，柱间留空',{'class':'secondary'});
+    }
+    label(32.6,84,width<480?'开关位置示意 · 线长 / 弯曲高度待试放':'开关位置示意 · 每条电源路线代表一组红黑线 · 圈数按余线调整',{'class':'secondary'});
+    detail.textContent={placement:'零件占地按 v0.4 尺寸；四孔支撑对位，IMU 保持背面现位。',imu:'IMU 线：先留松弯；不绕双柱中间，线圈高度以能自然合盖为准。',power:'电源线：电池 → 外侧绕柱 → 开关 → Feather；JST 处抬起回弯。',all:'v0.4 俯视｜零件占地按尺寸；接头位置与线弯为示意，保持现有插接关系。'}[mode];
+    root.dataset.currentMode=mode;
+  }
+  root.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();}));
+  new ResizeObserver(render).observe(root);
+  render();
+})();
+</script>

@@ -1,0 +1,38 @@
+{
+  "external_mm": [
+    65.25,
+    65.25,
+    11.6
+  ],
+  "cavity_mm": [
+    62.05,
+    62.05,
+    10.0
+  ],
+  "wall_mm": 1.6,
+  "floor_mm": 1.6,
+  "assembly_height_mm": 16.36,
+  "design_cable_end_allowance_mm": 8.0,
+  "triangles": 544,
+  "connected_components": 1,
+  "all_edges_used_twice": true,
+  "consistent_winding": true,
+  "euler_characteristic": 2,
+  "material_volume_mm3": 10775.177,
+  "bounding_box_mm": [
+    [
+      0.0,
+      65.25
+    ],
+    [
+      0.0,
+      65.25
+    ],
+    [
+      0.0,
+      11.600000381469727
+    ]
+  ],
+  "purpose": "Powerless footprint/route fit; not final enclosure or mounting design.",
+  "export_method": "Analytical standard-library mesh; SCAD generated from identical profiles. OpenSCAD renderer not run."
+}

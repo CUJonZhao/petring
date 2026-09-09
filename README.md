@@ -2,11 +2,19 @@
 
 This repository contains the working files for a Delta-first smart collar prototype.
 
-The current engineering goal is Stage 1: build a comfortable wearable prototype for Delta, a 4-month-old Sheltie, that streams IMU-based rest/activity data wirelessly from an ESP32 Feather/HUZZAH32 V2 to a browser dashboard on a computer.
+The current engineering goal is Stage 1: build a comfortable wearable prototype for Delta, a Sheltie, that streams IMU-based rest/activity data wirelessly from an ESP32 Feather/HUZZAH32 V2 to a browser dashboard on a computer.
+
+**Resume here (2026-09-09):** [Stage 1B handoff / 当前工作交接](docs/2026-09-09_stage1b_handoff.md).
+The v0.4 base and lid are ready for slicing and dry-fit printing. The user plans
+to print; completion and physical fit have not yet been reported.
+
+- [Current print package](hardware/enclosure/print_packages/delta_collar_v0_4_fit_print_20260909.zip)
+- [Base/lid instructions](hardware/enclosure/v0_4/README.md)
+- [Placement and cable-routing image](hardware/enclosure/v0_4/placement_routing.png)
 
 ## Current Stage
 
-Current status: Stage 1B bench and miniaturization preparation.
+Current status: Stage 1B enclosure printing and dry-fit preparation.
 
 Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
 LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
@@ -28,24 +36,62 @@ started. See
 `docs/2026-09-06_stage1b_printer_arrival_and_enclosure_kickoff.md` and the
 starting model in `hardware/enclosure/delta_collar_enclosure_v1.scad`.
 
+As of 2026-09-08, the calipers have arrived and GitHub changes through
+`7b54d0d` have been synced locally. Measured dimensions now feed a v0.3 low-wall
+tray for powerless fit checks; see `hardware/enclosure/README.md`.
+The first Feather, detached IMU, battery, and mounting-hole measurements are
+recorded in `docs/2026-09-08_stage1b_caliper_measurements.md`. Hole-edge references
+and the USB-inclusive length are confirmed, and mounting coordinates are derived.
+Switch dimensions are recorded; the current preference is to mount it externally,
+reserving cable exits and strain relief rather than internal switch space.
+Underside and IMU slide-fit photos are archived. The user clarified that
+19.59 mm measures the metal-pin gap, excluding the inward-projecting plastic
+header bodies; the earlier usable-width estimate is withdrawn. The IMU can be
+slid in from the side. The user confirms firm mechanical retention with no glue
+or insulating layer, and an unchanged assembled height of 16.36 mm. Electrical
+isolation and retention under motion remain to be verified; right-hand mounting
+access was subsequently confirmed by the user on September 9.
+A two-minute USB serial observation of this assembly then captured 2,370 samples
+at 19.98 Hz with no firmware errors or post-startup resets. IMU temperature ranged
+from 29.08 to 31.45 C. The user confirmed the battery was disconnected and reported
+no physical anomalies during capture. See
+`experiments/usb_slide_fit_2min_2026-09-08.md`; this is a short functional check,
+not completion of enclosure, insulation, or wearability validation.
+
+As of 2026-09-09, the user has printed the v0.3 tray and confirmed that the
+board assembly and battery fit side by side with spare space. A removable
+two-post cable guide (20 x 27 x 9 mm, shortened after the user's space check)
+is being printed for the long leads; see
+`docs/2026-09-09_stage1b_tray_fit_and_cable_routing.md`. A v0.4 base and separate
+lid now include four support posts, USB access, and a lay-in switch-wire exit.
+The actual plug housing is 8.95 x 3.30 mm; the combined wire envelope is
+3.32 x 1.59 mm, and the user confirms the IMU leaves the right holes accessible.
+The battery plug's hard plastic projects 1.06 mm beyond the PCB edge, leaving
+about 0.94 mm of nominal wall clearance; its raised wire bend needs a lid fit check.
+See `hardware/enclosure/v0_4/README.md` for both STLs and fit instructions.
+Mesh and nominal collision checks pass. Slicing, screw fit, cable routing and
+lid fit remain to be validated physically; M2 fasteners are not yet confirmed.
+
 Stage 1 intentionally does not include medical diagnosis, production waterproofing, phone app deployment, GPS/LTE, or validated heart/respiration measurement.
 
 ## Next Work
 
 Recommended next steps:
 
-1. Run a 1-hour battery-only bench runtime test with full CSV capture.
-2. Add or use tooling that saves complete test data and generates plots.
-3. Measure the real Feather, LiPo, IMU, JST switch, cable bends, header pin
-   protrusion (both sides), and the four corner mounting hole positions
-   against the nominal reference dimensions in
-   `docs/2026-09-06_stage1b_printer_arrival_and_enclosure_kickoff.md`, and
-   update `hardware/enclosure/delta_collar_enclosure_v1.scad` accordingly.
-4. Print the v0.2 base + lid, dry-fit the real components, check the
-   lid slip-fit, and add standoff pegs for the four mounting holes.
-5. Once the fit is good, add a switch cutout and cable strain relief, then
-   repeat the dry fit / enclosed USB / enclosed battery / motion calibration
-   sequence before any dog-worn test.
+1. Complete the current 20 x 27 x 9 mm cable-guide print and try it in the spare
+   area beside the battery with power disconnected.
+   Route internal slack loosely around the two posts; leave external switch
+   leads for external fastening. Confirm routing before attaching the guide
+   to the existing tray using the available foam tape, and record top/side photos.
+2. Import both v0.4 base and lid STLs, verify dimensions/orientation, slice and
+   print. Check all four post positions, the USB insertion path, the complete
+   wire bundle in its slot, and the lid fit without compressing components.
+3. Fit appropriate M2 fasteners and complete battery retention, external switch
+   mounting, cable strain relief and collar attachment. Resolve board-to-board
+   electrical isolation and retention before completing powered enclosure tests.
+4. Repeat the dry fit / enclosed USB / enclosed battery / motion calibration
+   sequence before any dog-worn test. The one-hour battery run, full capture
+   of that run, and summary plotting remain pending.
 
 ## Repository Layout
 
@@ -64,6 +110,11 @@ Recommended next steps:
 - `docs/2026-08-12_stage1_handoff.md`
 - `docs/2026-08-14_stage1_enclosure_bench_and_calibration.md`
 - `docs/2026-09-06_stage1b_printer_arrival_and_enclosure_kickoff.md`
+- `docs/2026-09-08_stage1b_caliper_measurements.md`
+- `docs/2026-09-09_stage1b_tray_fit_and_cable_routing.md`
+- `docs/2026-09-09_stage1b_handoff.md`
+- `experiments/usb_slide_fit_2min_2026-09-08.md`
+- `hardware/enclosure/README.md`
 
 ## Safety Note
 

@@ -1,0 +1,35 @@
+{
+  "part": "removable cable guide, not a full base/lid",
+  "dimensions_mm": [
+    20.0,
+    27.0,
+    9.0
+  ],
+  "base_thickness_mm": 1.2,
+  "post_core_diameter_mm": 10.0,
+  "post_flange_diameter_mm": 12.0,
+  "post_center_spacing_mm": 14.0,
+  "core_height_mm": 6.0,
+  "post_flange_gap_mm": 2.0,
+  "user_space_feedback": "About 30 mm available; requested long side 27 mm.",
+  "proposed_position_in_v0_3_mm": [
+    42.0,
+    28.0
+  ],
+  "nominal_gap_from_battery_footprint_mm": 2.5,
+  "nominal_gap_from_board_footprint_mm": 1.6,
+  "is_watertight": true,
+  "is_winding_consistent": true,
+  "connected_components": 1,
+  "euler_number": 2,
+  "faces": 1552,
+  "material_volume_mm3": 1949.881,
+  "limitations": "Wire bend radius/capacity not validated. Tape thickness not included. No slicing or printing performed.",
+  "libraries": {
+    "manifold3d": "3.5.3",
+    "trimesh": "5.1.0",
+    "numpy": "2.5.3",
+    "networkx": "3.6.1",
+    "Pillow": "12.3.0"
+  }
+}

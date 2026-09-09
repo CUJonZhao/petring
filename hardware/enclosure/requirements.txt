@@ -1,0 +1,6 @@
+# Versions used for the v0.3 guide and v0.4 CAD exports on Python 3.12.3.
+manifold3d==3.5.3
+trimesh==5.1.0
+numpy==2.5.3
+networkx==3.6.1
+Pillow==12.3.0
