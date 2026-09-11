@@ -30,3 +30,6 @@ wifi_config.*
 Thumbs.db
 .vscode/
 .idea/
+
+# Website is a separate Sites-owned source repository.
+/site/

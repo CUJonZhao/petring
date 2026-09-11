@@ -3,11 +3,19 @@
 This repository contains the working files for Delta's rest/activity prototype,
 including hardware, enclosure CAD, ESP32 firmware and experiment reports.
 
-The current Stage 1B goal is to record IMU activity offline and review complete
-sessions in a phone browser. A harness-mounted walking monitor is being explored
+The current Stage 1B goal is to record IMU activity offline, review complete
+sessions in a phone browser, and sync them automatically to a private website
+after the board returns to home Wi-Fi. A harness-mounted walking monitor is being explored
 because of the assembled enclosure's size; wearing/dog tests are deferred.
 
-**Resume here (2026-09-09):** [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
+**Resume here (2026-09-11):** [Today's report / 今日报告](docs/2026-09-11_daily_report.md) ·
+[Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
+The board records by itself away from home Wi-Fi, closes the session after it reconnects,
+uploads it to the private site, and frees space only from cloud-confirmed sessions.
+Firmware revisions pass host checks but are **not yet flashed or validated on the board**;
+next step on the Mac: `bash experiments/cloud_sync_mac.sh all`.
+
+Previous (2026-09-09): [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
 [Firmware handoff / 软件交接](docs/2026-09-09_offline_motion_logging.md).
 The user has reported v0.4 printing and assembly complete. The offline recorder
 has now been backed up/upgraded and tested on the board: a two-minute USB run
@@ -26,8 +34,10 @@ Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.m
 
 ## Current Stage
 
-Current status: Stage 1B offline recording uploaded and USB short bench passed;
-sampling timing refinement and one-hour battery validation remain pending.
+Current status: Stage 1B home Wi-Fi auto-sync firmware and private website are
+implemented; the firmware awaits ESP32 build/flash and physical upload validation.
+Offline recording and its USB short bench passed; sampling timing refinement and
+one-hour battery validation remain pending.
 
 Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
 LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
@@ -92,18 +102,20 @@ Stage 1 intentionally does not include medical diagnosis, production waterproofi
 
 Recommended next steps:
 
-1. Review/download the real short recording in the phone-friendly `/records` page.
-2. If fixed-rate behavior analysis is required, decouple sampling from synchronous
+1. Flash and validate home Wi-Fi sync: `bash experiments/cloud_sync_mac.sh all`,
+   then confirm the session on the private site and take one real short walk.
+2. Review/download the real short recording in the phone-friendly `/records` page.
+3. If fixed-rate behavior analysis is required, decouple sampling from synchronous
    flash writes and recheck interval distribution.
-3. Run a one-hour battery-only desktop capture and inspect actual sampling gaps,
+4. Run a one-hour battery-only desktop capture and inspect actual sampling gaps,
    voltage trend, flash usage and full-session retrieval.
-4. Use real recordings to refine activity reports. Do not advance wearing/dog
+5. Use real recordings to refine activity reports. Do not advance wearing/dog
    testing until the user resumes that work.
 
 ## Repository Layout
 
 - `docs/` - proposals, purchase/build notes, and PDF generation script.
-- `firmware/` - ESP32 firmware will live here.
+- `firmware/` - ESP32 firmware (`imu_raw_stream` is the current recorder with home Wi-Fi sync).
 - `hardware/` - wiring notes, enclosure sketches, hardware photos/diagrams, and enclosure CAD (OpenSCAD) starting point in `hardware/enclosure/`.
 - `experiments/` - experiment plans and observation logs.
 - `data/raw/` - raw CSV/log captures, ignored by Git except `.gitkeep`.
@@ -120,6 +132,8 @@ Recommended next steps:
 - `docs/2026-09-08_stage1b_caliper_measurements.md`
 - `docs/2026-09-09_stage1b_tray_fit_and_cable_routing.md`
 - `docs/2026-09-09_stage1b_handoff.md`
+- [2026-09-11 daily report](docs/2026-09-11_daily_report.md)
+- [Home Wi-Fi auto sync](docs/2026-09-11_home_wifi_cloud_sync.md)
 - [2026-09-09 daily report](docs/2026-09-09_daily_report.md)
 - [Offline recording handoff](docs/2026-09-09_offline_motion_logging.md)
 - [Physical offline USB bench](experiments/offline_usb_bench_2026-09-09.md)

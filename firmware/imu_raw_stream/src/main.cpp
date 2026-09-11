@@ -7,6 +7,7 @@
 
 #include <math.h>
 #include "motion_logger.h"
+#include "cloud_sync.h"
 #include "records_page.h"
 
 namespace {
@@ -32,6 +33,7 @@ constexpr float kGyroDpsPerLsb = 0.0175f;  // +/-500 deg/s range
 bool batteryLogReady = false;
 bool imuReady = false;
 MotionLogger motionLogger;
+CloudSync cloudSync(motionLogger);
 float batteryVoltage = 0.0f;
 WebServer server(80);
 Preferences preferences;
@@ -359,7 +361,17 @@ void clearBatteryLog() {
 
 void handleSerialCommands() {
   while (Serial.available()) {
-    switch (Serial.read()) {
+    static String provisioning;
+    static bool receiving = false;
+    const char ch = Serial.read();
+    if(receiving){
+      if(ch=='\n'){Serial.println(cloudSync.configure(provisioning)?"STATUS,cloud_configured":"ERROR,cloud_config_invalid");provisioning="";receiving=false;}
+      else if(ch!='\r'){if(provisioning.length()<2048)provisioning+=ch;else{provisioning="";receiving=false;}}
+      continue;
+    }
+    if(ch=='U'){receiving=true;provisioning="";continue;}
+    if(ch=='Q'){Serial.println(cloudSync.statusJson());continue;}
+    switch (ch) {
       case 'D':
       case 'd':
         if (motionLogger.recording()) Serial.println("ERROR,stop_motion_recording_with_S_first");
@@ -502,6 +514,7 @@ void connectToStation(const String& ssid, const String& password, bool saveOnSuc
   stationSsid = ssid;
   stationPassword = password;
   stationCredentialsNeedSaving = saveOnSuccess;
+  WiFi.setAutoReconnect(true);
   WiFi.begin(stationSsid.c_str(), stationPassword.c_str());
   Serial.printf("STATUS,STA_connecting,STA_ssid=%s\n", stationSsid.c_str());
 }
@@ -548,6 +561,10 @@ void startDashboard() {
   server.on("/api/recording", HTTP_GET, []() {
     server.sendHeader("Cache-Control", "no-store");
     server.send(200, "application/json", motionLogger.statusJson());
+  });
+  server.on("/api/cloud", HTTP_GET, []() {
+    server.sendHeader("Cache-Control", "no-store");
+    server.send(200, "application/json", cloudSync.statusJson());
   });
   server.on("/api/recording/start", HTTP_POST, []() {
     if (!imuReady) { server.send(503, "application/json", "{\"error\":\"imu_unavailable\"}"); return; }
@@ -677,8 +694,12 @@ void setup() {
   Serial.printf("STATUS,LSM6DSOX_%s,battery_v=%.3f\n", imuReady ? "ready" : "unavailable", batteryVoltage);
   Serial.println(
       "ms,ax_g,ay_g,az_g,gx_dps,gy_dps,gz_dps,temp_c,motion_g,battery_v");
+  cloudSync.begin();
   startDashboard();
-  if (motionLogger.begin() && imuReady) motionLogger.start();
+  const bool storageReady = motionLogger.begin();
+  // With home sync configured, CloudSync starts sessions only away from home
+  // Wi-Fi; otherwise keep the original record-from-power-on behavior.
+  if (storageReady && imuReady && !cloudSync.enabled()) motionLogger.start();
 }
 
 void loop() {
@@ -694,6 +715,8 @@ void loop() {
       stopAccessPoint();
     } else {
       startAccessPoint();
+      static uint32_t lastReconnect = 0;
+      if(millis()-lastReconnect>=15000){lastReconnect=millis();WiFi.reconnect();}
     }
   }
 
@@ -705,4 +728,5 @@ void loop() {
     printSample();
   }
   motionLogger.tick(millis());
+  cloudSync.tick(radioEnabled && WiFi.status() == WL_CONNECTED, imuReady, batteryVoltage);
 }

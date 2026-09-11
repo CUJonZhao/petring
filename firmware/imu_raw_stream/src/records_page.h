@@ -20,7 +20,7 @@ canvas{display:block;width:100%;height:220px;background:#f7faf8}.axis{display:fl
 @media(max-width:500px){main{padding:12px}.panel{padding:14px}.metrics{gap:14px}h1{font-size:23px}}
 </style></head><body><main>
 <a href="/">← 实时仪表盘</a><h1>离线运动记录</h1>
-<p class="muted">开机自动开始一条新记录。离开 Wi-Fi、关闭网页，设备仍会保存数据。准备关机或下载时，先停止记录。</p>
+<p class="muted" id="intro">开机自动开始一条新记录。离开 Wi-Fi、关闭网页，设备仍会保存数据。准备关机或下载时，先停止记录。</p>
 <section class="panel"><h2 id="state">正在连接设备…</h2>
 <div class="metrics">
 <div><span class="label">本次已写入</span><strong id="saved">—</strong></div>
@@ -31,6 +31,9 @@ canvas{display:block;width:100%;height:220px;background:#f7faf8}.axis{display:fl
 <p id="message" role="status" aria-live="polite"></p>
 <p class="muted">约每秒写入一次。突然断电可能丢失最后一批数据；未正常结束的记录会保留并标记。空间不足时停止，不覆盖历史。</p>
 </section>
+<section class="panel" id="cloud-panel" hidden><h2>回家自动同步</h2>
+<p><strong id="cloud-state">—</strong></p><p id="cloud-detail" class="muted"></p>
+<p class="muted">完整历史网址：<a id="cloud-site" target="_blank" rel="noopener"></a></p></section>
 <section class="panel"><h2>保存在设备上的历史</h2>
 <p class="muted">先停止记录，再查看、下载或删除历史，避免文件传输打断采样。下载到手机后即可留存，设备不需要互联网。</p>
 <button id="refresh" class="secondary" disabled>刷新历史</button><div id="sessions"></div></section>
@@ -45,6 +48,8 @@ const $ = id => document.getElementById(id);
 const states = {complete:'正常结束',interrupted:'未正常结束（断电或重启）',storage_full:'存储空间不足，已停止',io_error:'写入异常',sensor_error:'传感器读取异常',recording:'正在记录'};
 const errors = {storage_unavailable:'存储不可用',storage_unavailable_no_autoformat:'存储无法挂载，已有数据未被清除',storage_full:'空间不足，请先下载并清理历史',stop_recording_first:'请先停止记录',imu_unavailable:'传感器未就绪',write_failed:'写入失败',finalize_failed:'结束标记失败，记录仍保留',corrupt_record_download_binary_for_recovery:'检测到数据损坏，请下载原始文件恢复',invalid_header_download_binary_for_recovery:'记录头损坏，请下载原始文件检查'};
 const minutes = ms => (ms / 60000).toFixed(1) + ' 分钟';
+const cloudModes = {starting:'正在启动',away_pending:'未连上家里 Wi-Fi，约 10 秒后自动开始记录',recording:'离家中，设备正在自动记录',held:'已手动停止；回家后恢复自动记录',home_recording:'在家手动记录中，停止后上传',waiting_clock:'已回家，等待网络校时后上传',syncing:'已回家，正在上传到网站',home:'在家 · 记录已同步',error:'同步暂时失败，稍后自动重试'};
+let cloudOn = false;
 function message(text=''){ $('message').textContent = text; }
 function controls(){
   $('stop').disabled = busy || !online || !recording;
@@ -70,6 +75,7 @@ async function status(){
     $('remaining').textContent = Math.floor(s.estimated_seconds / 60) + ' 分钟';
     $('detail').textContent = '剩余 ' + (s.free_bytes / 1048576).toFixed(2) + ' MiB；缓冲 ' + s.buffered_samples + ' 条；读取错误 ' + s.read_errors + ' 次。容量估计不代表电池续航。';
     if(s.error) message(errors[s.error] || s.error);
+    await cloud();
     if(knownState !== recording) {
       knownState = recording;
       if(!recording) await history();
@@ -81,6 +87,17 @@ async function status(){
     $('detail').textContent = '这里只表示网页断开连接。设备是否仍在记录，需要重新连接后确认。';
   }
   controls();
+}
+async function cloud(){
+  try {
+    const c = await (await request('/api/cloud')).json();
+    cloudOn = !!c.configured; $('cloud-panel').hidden = !cloudOn;
+    if(!cloudOn) return;
+    $('intro').textContent = '已开启回家同步：离开家里 Wi-Fi 约 10 秒后自动开始记录；回家连上 15 秒后自动结束并上传到网站。上传经网站校验后，空间不足时才从设备上删除最旧的已上传记录。';
+    $('cloud-state').textContent = cloudModes[c.mode] || c.mode;
+    $('cloud-detail').textContent = '待上传 ' + c.pending + ' 段 · 设备上已上传 ' + c.synced + ' 段' + (c.rejected ? ' · 网站拒收 ' + c.rejected + ' 段' : '') + (c.pruned_this_boot ? ' · 本次开机清理 ' + c.pruned_this_boot + ' 段' : '') + (c.mode === 'syncing' && c.bytes ? ' · 当前 ' + Math.round(100 * c.offset / c.bytes) + '%' : '') + (c.error ? ' · ' + c.error : '') + (c.last_sync_unix_ms ? ' · 最近上传 ' + new Date(c.last_sync_unix_ms).toLocaleString() : '');
+    $('cloud-site').textContent = c.site; $('cloud-site').href = c.site;
+  } catch { $('cloud-panel').hidden = true; }
 }
 async function action(fn){
   if(busy) return;
@@ -108,7 +125,7 @@ async function history(){
     const card=document.createElement('div'); card.className='session';
     const title=document.createElement('p');
     const when=s.start_unix_ms ? new Date(s.start_unix_ms).toLocaleString() : '未设置日历时间';
-    title.textContent=s.id+' · '+(states[s.state]||s.state)+' · '+when;
+    title.textContent=s.id+' · '+(states[s.state]||s.state)+' · '+when+(cloudOn ? (s.synced ? ' · 已上传网站' : ' · 待回家上传') : '');
     const detail=document.createElement('p'); detail.className='muted';
     detail.textContent=s.records.toLocaleString()+' 条（按文件长度）；'+(s.bytes/1048576).toFixed(2)+' MiB。'+(!s.header_valid?'记录头异常。':'')+(s.trailing_bytes?'末尾不完整字节将从 CSV 中略去。':'');
     const actions=document.createElement('div'); actions.className='actions';

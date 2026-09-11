@@ -11,6 +11,7 @@
 bool mountLogFilesystem(fs::LittleFSFS& fs, const char* label, const char* base);
 
 class MotionLogger {
+  friend class CloudSync;
  public:
   bool begin();
   bool start(uint64_t unixMs = 0);

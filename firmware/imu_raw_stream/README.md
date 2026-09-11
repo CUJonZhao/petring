@@ -1,5 +1,15 @@
 # IMU stream and offline activity recorder
 
+**2026-09-11 — home Wi-Fi sync.** Once site credentials are provisioned over USB
+(`experiments/cloud_sync_mac.sh validate`), recording is automatic: a session starts
+~10 s after the saved home Wi-Fi is out of reach (30 s grace after power-on), ends 15 s
+after a stable home reconnect, and every unconfirmed session is uploaded newest-first
+in resumable 16 KiB chunks with SHA-256 confirmation. Cloud-confirmed sessions are
+deleted oldest-first only when less than ~1 h of space remains. `GET /api/cloud` and
+serial `Q` report sync state; `/records` shows it with per-session badges. Without
+credentials the original record-from-power-on behavior below is unchanged. Details:
+[docs/2026-09-11_home_wifi_cloud_sync.md](../../docs/2026-09-11_home_wifi_cloud_sync.md).
+
 **2026-09-09:** offline logging and the phone-friendly `/records` page are now
 uploaded to the board. The first USB bench passed actual Wi-Fi-off recording,
 CSV/binary comparison and restart persistence: 2,279 samples over 120.093 seconds,
@@ -58,8 +68,9 @@ and live dashboard requests remain available. Wi-Fi remains enabled for access
 and reconnection by default. Serial `O` temporarily disables Wi-Fi without stopping
 the recording; `W` restores Wi-Fi and the saved network; `N` prints network status.
 These controls allow a bench test with the radio actually disabled. They do not
-erase credentials and are not persistent across reboot. Cloud upload/Bluetooth
-sync and a phone-page radio control are not implemented.
+erase credentials and are not persistent across reboot. Home Wi-Fi cloud upload is
+described at the top of this file; Bluetooth sync and a phone-page radio control
+are not implemented.
 
 ## Storage and migration
 

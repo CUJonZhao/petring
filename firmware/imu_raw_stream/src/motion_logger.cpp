@@ -87,7 +87,8 @@ bool MotionLogger::start(uint64_t unixMs) {
     char id[9];
     snprintf(id, sizeof(id), "%08lx", (unsigned long)esp_random());
     id_ = id;
-    if (pathFor(id_).isEmpty()) { unique = true; break; }
+    // A leftover cloud acknowledgement must never mark a new session as uploaded.
+    if (pathFor(id_).isEmpty() && !fs_.exists("/" + id_ + ".ack")) { unique = true; break; }
   }
   if (!unique) { error_ = "id_allocation_failed"; return false; }
   file_ = fopen(("/motion/" + id_ + ".open").c_str(), "wb");
@@ -214,13 +215,15 @@ void MotionLogger::list(WebServer& server) {
       const size_t payload = valid ? f.size() - motion::kHeaderBytes : 0;
       uint64_t unixMs = valid ? uint64_t(motion::get32(h + 16)) |
                                   (uint64_t(motion::get32(h + 20)) << 32) : 0;
-      char row[320];
+      // "synced": the website confirmed this file's SHA-256 (home Wi-Fi sync).
+      const bool synced = fs_.exists("/" + id + ".ack");
+      char row[360];
       snprintf(row, sizeof(row),
           "%s{\"id\":\"%s\",\"state\":\"%s\",\"bytes\":%u,\"records\":%u,"
-          "\"trailing_bytes\":%u,\"header_valid\":%s,\"start_unix_ms\":%llu}",
+          "\"trailing_bytes\":%u,\"header_valid\":%s,\"start_unix_ms\":%llu,\"synced\":%s}",
           first ? "" : ",", id.c_str(), stateFor("/" + name), unsigned(f.size()),
           unsigned(payload / motion::kRecordBytes), unsigned(payload % motion::kRecordBytes),
-          valid ? "true" : "false", (unsigned long long)unixMs);
+          valid ? "true" : "false", (unsigned long long)unixMs, synced ? "true" : "false");
       server.sendContent(row);
       first = false;
     }
@@ -308,5 +311,7 @@ void MotionLogger::remove(WebServer& server) {
   if (path.isEmpty()) { fail(server, 404, "session_not_found"); return; }
   if (server.arg("confirm") != id) { fail(server, 400, "confirmation_required"); return; }
   if (!fs_.remove(path)) { fail(server, 500, "delete_failed"); return; }
+  for (const char* marker : {".ack", ".retry", ".reject"})
+    if (fs_.exists("/" + id + marker)) fs_.remove("/" + id + marker);
   json(server, 200, "{\"deleted\":true}");
 }
