@@ -1,0 +1,4 @@
+# Host bench scripts and report figures; firmware builds use PlatformIO.
+requests>=2.32,<3
+pyserial==3.5
+matplotlib==3.11.1

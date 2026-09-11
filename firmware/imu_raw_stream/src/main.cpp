@@ -6,6 +6,8 @@
 #include <Wire.h>
 
 #include <math.h>
+#include "motion_logger.h"
+#include "records_page.h"
 
 namespace {
 
@@ -28,6 +30,8 @@ constexpr float kAccelGPerLsb = 0.000122f;  // +/-4 g range
 constexpr float kGyroDpsPerLsb = 0.0175f;  // +/-500 deg/s range
 
 bool batteryLogReady = false;
+bool imuReady = false;
+MotionLogger motionLogger;
 float batteryVoltage = 0.0f;
 WebServer server(80);
 Preferences preferences;
@@ -35,6 +39,10 @@ String stationSsid;
 String stationPassword;
 bool stationCredentialsNeedSaving = false;
 bool accessPointRunning = false;
+bool radioEnabled = true;
+
+void startAccessPoint();
+void connectToStation(const String& ssid, const String& password, bool saveOnSuccess);
 
 struct ImuSample {
   unsigned long timestampMs = 0;
@@ -96,7 +104,7 @@ const char kDashboardHtml[] PROGMEM = R"HTML(
 <body>
   <header>
     <h1>Delta Collar</h1>
-    <p>Live IMU and battery monitor</p>
+    <p>Live IMU and battery monitor · <a href="/records" style="color:white">离线记录 / 完整历史</a></p>
   </header>
   <main>
     <section class="summary" aria-label="Current status">
@@ -107,7 +115,7 @@ const char kDashboardHtml[] PROGMEM = R"HTML(
       <dl class="metric"><dt>Apartment Wi-Fi</dt><dd id="network" class="small">Not configured</dd></dl>
     </section>
     <section class="panel">
-      <div class="panel-header"><h2>Motion activity</h2><span id="connection">Connecting</span></div>
+      <div class="panel-header"><h2>Motion activity · recent ~45 seconds</h2><span id="connection">Connecting</span></div>
       <canvas id="chart" width="820" height="220" aria-label="Activity history"></canvas>
     </section>
     <section class="panel">
@@ -354,11 +362,45 @@ void handleSerialCommands() {
     switch (Serial.read()) {
       case 'D':
       case 'd':
-        dumpBatteryLog();
+        if (motionLogger.recording()) Serial.println("ERROR,stop_motion_recording_with_S_first");
+        else dumpBatteryLog();
         break;
       case 'C':
       case 'c':
         clearBatteryLog();
+        break;
+      case 'R':
+      case 'r':
+        if (!imuReady || !motionLogger.start()) Serial.println("ERROR,motion_start_failed");
+        break;
+      case 'S':
+      case 's':
+        motionLogger.stop();
+        break;
+      case 'L':
+      case 'l':
+        Serial.println(motionLogger.statusJson());
+        break;
+      case 'O':
+      case 'o':
+        // Bench/offline control: retain credentials and the current recording.
+        radioEnabled = false;
+        WiFi.disconnect(false, false);
+        WiFi.mode(WIFI_OFF);
+        accessPointRunning = false;
+        Serial.println("STATUS,WiFi_off,recording_unchanged");
+        break;
+      case 'W':
+      case 'w':
+        radioEnabled = true;
+        startAccessPoint();
+        connectToStation(stationSsid, stationPassword, false);
+        Serial.println("STATUS,WiFi_on,recording_unchanged");
+        break;
+      case 'N':
+      case 'n':
+        Serial.printf("STATUS,network,enabled=%d,connected=%d,ip=%s\n", radioEnabled,
+                      WiFi.status() == WL_CONNECTED, WiFi.localIP().toString().c_str());
         break;
     }
   }
@@ -397,6 +439,10 @@ void sendLatestSample() {
 }
 
 void sendBatteryLog() {
+  if (motionLogger.recording()) {
+    server.send(409, "text/plain", "Stop motion recording before downloading logs.\n");
+    return;
+  }
   if (!batteryLogReady) {
     server.send(503, "text/plain", "Battery log unavailable\n");
     return;
@@ -498,6 +544,32 @@ void startDashboard() {
   startAccessPoint();
 
   server.on("/", HTTP_GET, []() { server.send_P(200, "text/html", kDashboardHtml); });
+  server.on("/records", HTTP_GET, []() { server.send_P(200, "text/html", kRecordsHtml); });
+  server.on("/api/recording", HTTP_GET, []() {
+    server.sendHeader("Cache-Control", "no-store");
+    server.send(200, "application/json", motionLogger.statusJson());
+  });
+  server.on("/api/recording/start", HTTP_POST, []() {
+    if (!imuReady) { server.send(503, "application/json", "{\"error\":\"imu_unavailable\"}"); return; }
+    uint64_t unixMs = 0;
+    const String supplied = server.arg("unix_ms");
+    if (!supplied.isEmpty()) {
+      char* end = nullptr;
+      unixMs = strtoull(supplied.c_str(), &end, 10);
+      if (*end || unixMs < 1577836800000ULL || unixMs > 4102444800000ULL) {
+        server.send(400, "application/json", "{\"error\":\"invalid_unix_ms\"}"); return;
+      }
+    }
+    const bool ok = motionLogger.start(unixMs);
+    server.send(ok ? 200 : 503, "application/json", motionLogger.statusJson());
+  });
+  server.on("/api/recording/stop", HTTP_POST, []() {
+    const bool ok = motionLogger.stop();
+    server.send(ok ? 200 : 500, "application/json", motionLogger.statusJson());
+  });
+  server.on("/api/sessions", HTTP_GET, []() { motionLogger.list(server); });
+  server.on("/api/session", HTTP_GET, []() { motionLogger.download(server); });
+  server.on("/api/session", HTTP_DELETE, []() { motionLogger.remove(server); });
   server.on("/setup", HTTP_GET,
             []() { server.send_P(200, "text/html", kNetworkSetupHtml); });
   server.on("/api/latest", HTTP_GET, sendLatestSample);
@@ -533,6 +605,8 @@ void printSample() {
   uint8_t raw[14] = {};
   if (!readRegisters(kOutputStartRegister, raw, sizeof(raw))) {
     Serial.println("ERROR,imu_read_failed");
+    latestSample.valid = false;
+    motionLogger.readFailure();
     return;
   }
 
@@ -564,6 +638,15 @@ void printSample() {
   latestSample.valid = true;
   updateActivity(motionG, gyroX, gyroY, gyroZ);
 
+  motion::Sample stored = {};
+  stored.accel[0] = accelXRaw; stored.accel[1] = accelYRaw; stored.accel[2] = accelZRaw;
+  stored.gyro[0] = gyroXRaw; stored.gyro[1] = gyroYRaw; stored.gyro[2] = gyroZRaw;
+  stored.temperature = temperatureRaw;
+  stored.batteryMv = uint16_t(lroundf(batteryVoltage * 1000));
+  stored.activity = uint8_t(lroundf(latestSample.activityScore * 255));
+  stored.active = latestSample.active;
+  motionLogger.sample(stored, latestSample.timestampMs);
+
   Serial.printf("%lu,%.4f,%.4f,%.4f,%.2f,%.2f,%.2f,%.2f,%.4f,%.3f\n",
                 latestSample.timestampMs, accelX, accelY, accelZ, gyroX, gyroY,
                 gyroZ, latestSample.temperatureC, motionG, batteryVoltage);
@@ -579,25 +662,23 @@ void setup() {
   batteryVoltage = readBatteryVoltage();
   Wire.begin();
 
-  if (!configureImu()) {
+  imuReady = configureImu();
+  if (!imuReady) {
     Serial.println("ERROR,LSM6DSOX_configuration_failed");
-    while (true) {
-      delay(1000);
-    }
   }
 
-  // Format only the dedicated data partition if this is its first use.
-  batteryLogReady = LittleFS.begin(true);
+  batteryLogReady = mountLogFilesystem(LittleFS, "spiffs", "/littlefs");
   if (!batteryLogReady) {
     Serial.println("ERROR,battery_log_mount_failed");
   } else {
     appendBatteryLog();
   }
 
-  Serial.printf("STATUS,LSM6DSOX_ready,battery_v=%.3f\n", batteryVoltage);
+  Serial.printf("STATUS,LSM6DSOX_%s,battery_v=%.3f\n", imuReady ? "ready" : "unavailable", batteryVoltage);
   Serial.println(
       "ms,ax_g,ay_g,az_g,gx_dps,gy_dps,gz_dps,temp_c,motion_g,battery_v");
   startDashboard();
+  if (motionLogger.begin() && imuReady) motionLogger.start();
 }
 
 void loop() {
@@ -608,7 +689,7 @@ void loop() {
     saveStationCredentials();
   }
 
-  if (!stationSsid.isEmpty()) {
+  if (radioEnabled && !stationSsid.isEmpty()) {
     if (WiFi.status() == WL_CONNECTED) {
       stopAccessPoint();
     } else {
@@ -619,8 +700,9 @@ void loop() {
   static unsigned long lastSampleMs = 0;
   const unsigned long now = millis();
 
-  if (now - lastSampleMs >= kSampleIntervalMs) {
+  if (imuReady && now - lastSampleMs >= kSampleIntervalMs) {
     lastSampleMs = now;
     printSample();
   }
+  motionLogger.tick(millis());
 }

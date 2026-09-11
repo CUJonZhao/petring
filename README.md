@@ -1,20 +1,33 @@
-# Delta Rest & Activity Smart Collar Prototype
+# Delta Rest & Activity Prototype
 
-This repository contains the working files for a Delta-first smart collar prototype.
+This repository contains the working files for Delta's rest/activity prototype,
+including hardware, enclosure CAD, ESP32 firmware and experiment reports.
 
-The current engineering goal is Stage 1: build a comfortable wearable prototype for Delta, a Sheltie, that streams IMU-based rest/activity data wirelessly from an ESP32 Feather/HUZZAH32 V2 to a browser dashboard on a computer.
+The current Stage 1B goal is to record IMU activity offline and review complete
+sessions in a phone browser. A harness-mounted walking monitor is being explored
+because of the assembled enclosure's size; wearing/dog tests are deferred.
 
-**Resume here (2026-09-09):** [Stage 1B handoff / 当前工作交接](docs/2026-09-09_stage1b_handoff.md).
-The v0.4 base and lid are ready for slicing and dry-fit printing. The user plans
-to print; completion and physical fit have not yet been reported.
+**Resume here (2026-09-09):** [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
+[Firmware handoff / 软件交接](docs/2026-09-09_offline_motion_logging.md).
+The user has reported v0.4 printing and assembly complete. The offline recorder
+has now been backed up/upgraded and tested on the board: a two-minute USB run
+saved 2,279 samples through a Wi-Fi-off interval; CSV/binary comparison and
+restart persistence passed. See the [physical report](experiments/offline_usb_bench_2026-09-09.md).
+Average sampling was 18.97 Hz with flash-write timing gaps. One-hour battery
+testing remains pending; wearing/dog testing is explicitly deferred.
+Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.md).
 
 - [Current print package](hardware/enclosure/print_packages/delta_collar_v0_4_fit_print_20260909.zip)
 - [Base/lid instructions](hardware/enclosure/v0_4/README.md)
 - [Placement and cable-routing image](hardware/enclosure/v0_4/placement_routing.png)
+- [Assembled prototype photo](hardware/reference_images/stage1b_v0_4_assembled_2026-09-09.jpg)
+
+![Real USB bench: offline recording and sampling intervals](docs/figures/offline_usb_bench_2026-09-09.png)
 
 ## Current Stage
 
-Current status: Stage 1B enclosure printing and dry-fit preparation.
+Current status: Stage 1B offline recording uploaded and USB short bench passed;
+sampling timing refinement and one-hour battery validation remain pending.
 
 Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
 LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
@@ -27,9 +40,8 @@ Stage 1B focuses on:
 - Longer battery-only bench runtime testing.
 - Full-resolution data capture and automatic summary plots.
 - Activity/rest threshold review from repeatable bench and hand-motion tests.
-- Smaller 3D-printable enclosure planning.
-- Dog-worn testing only after the smaller enclosure passes dry fit, enclosed
-  USB, enclosed battery, and motion calibration checks.
+- Documenting the completed v0.4 enclosure and its remaining fit/retention details.
+- Exploring a harness mount after the user resumes wearing tests.
 
 As of 2026-09-06, a 3D printer has arrived and enclosure CAD work has
 started. See
@@ -61,7 +73,7 @@ not completion of enclosure, insulation, or wearability validation.
 As of 2026-09-09, the user has printed the v0.3 tray and confirmed that the
 board assembly and battery fit side by side with spare space. A removable
 two-post cable guide (20 x 27 x 9 mm, shortened after the user's space check)
-is being printed for the long leads; see
+was designed for the long leads; see
 `docs/2026-09-09_stage1b_tray_fit_and_cable_routing.md`. A v0.4 base and separate
 lid now include four support posts, USB access, and a lay-in switch-wire exit.
 The actual plug housing is 8.95 x 3.30 mm; the combined wire envelope is
@@ -69,8 +81,10 @@ The actual plug housing is 8.95 x 3.30 mm; the combined wire envelope is
 The battery plug's hard plastic projects 1.06 mm beyond the PCB edge, leaving
 about 0.94 mm of nominal wall clearance; its raised wire bend needs a lid fit check.
 See `hardware/enclosure/v0_4/README.md` for both STLs and fit instructions.
-Mesh and nominal collision checks pass. Slicing, screw fit, cable routing and
-lid fit remain to be validated physically; M2 fasteners are not yet confirmed.
+Mesh and nominal collision checks pass. The user subsequently confirmed printing
+and assembly complete, with a [closed-case photo](hardware/reference_images/stage1b_v0_4_assembled_2026-09-09.jpg).
+The final screw specification and internal retention details were not separately
+confirmed; assembly completion does not certify wearing fit or waterproofing.
 
 Stage 1 intentionally does not include medical diagnosis, production waterproofing, phone app deployment, GPS/LTE, or validated heart/respiration measurement.
 
@@ -78,20 +92,13 @@ Stage 1 intentionally does not include medical diagnosis, production waterproofi
 
 Recommended next steps:
 
-1. Complete the current 20 x 27 x 9 mm cable-guide print and try it in the spare
-   area beside the battery with power disconnected.
-   Route internal slack loosely around the two posts; leave external switch
-   leads for external fastening. Confirm routing before attaching the guide
-   to the existing tray using the available foam tape, and record top/side photos.
-2. Import both v0.4 base and lid STLs, verify dimensions/orientation, slice and
-   print. Check all four post positions, the USB insertion path, the complete
-   wire bundle in its slot, and the lid fit without compressing components.
-3. Fit appropriate M2 fasteners and complete battery retention, external switch
-   mounting, cable strain relief and collar attachment. Resolve board-to-board
-   electrical isolation and retention before completing powered enclosure tests.
-4. Repeat the dry fit / enclosed USB / enclosed battery / motion calibration
-   sequence before any dog-worn test. The one-hour battery run, full capture
-   of that run, and summary plotting remain pending.
+1. Review/download the real short recording in the phone-friendly `/records` page.
+2. If fixed-rate behavior analysis is required, decouple sampling from synchronous
+   flash writes and recheck interval distribution.
+3. Run a one-hour battery-only desktop capture and inspect actual sampling gaps,
+   voltage trend, flash usage and full-session retrieval.
+4. Use real recordings to refine activity reports. Do not advance wearing/dog
+   testing until the user resumes that work.
 
 ## Repository Layout
 
@@ -113,6 +120,9 @@ Recommended next steps:
 - `docs/2026-09-08_stage1b_caliper_measurements.md`
 - `docs/2026-09-09_stage1b_tray_fit_and_cable_routing.md`
 - `docs/2026-09-09_stage1b_handoff.md`
+- [2026-09-09 daily report](docs/2026-09-09_daily_report.md)
+- [Offline recording handoff](docs/2026-09-09_offline_motion_logging.md)
+- [Physical offline USB bench](experiments/offline_usb_bench_2026-09-09.md)
 - `experiments/usb_slide_fit_2min_2026-09-08.md`
 - `hardware/enclosure/README.md`
 
