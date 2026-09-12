@@ -20,6 +20,8 @@ class CloudSync {
   bool enabled() const { return enabled_; }
   String statusJson() const;
   uint64_t unixMs() const;
+  // Read-only probe of the site's status endpoint, for timing only (serial "T").
+  void selfTest(uint8_t rounds = 3);
 
  private:
   enum class Result { ok, retry, reject, auth };
@@ -38,8 +40,6 @@ class CloudSync {
   int send(const char* action, const String& query, const uint8_t* bytes, size_t size,
            bool post, String& location);
   void closeConnection();
-  // Read-only probe of the site's status endpoint, for timing only (serial "T").
-  void selfTest(uint8_t rounds = 3);
   bool confirmed() const;
   std::vector<Entry> scan();
   bool selectFile();
