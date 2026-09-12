@@ -371,6 +371,8 @@ void handleSerialCommands() {
     }
     if(ch=='U'){receiving=true;provisioning="";continue;}
     if(ch=='Q'){Serial.println(cloudSync.statusJson());continue;}
+    // Timing probe of the site (read-only); prints one STATUS,cloud_timing per request.
+    if(ch=='T'){cloudSync.selfTest();continue;}
     switch (ch) {
       case 'D':
       case 'd':

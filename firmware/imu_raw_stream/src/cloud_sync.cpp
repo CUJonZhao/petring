@@ -2,7 +2,6 @@
 
 #include <HTTPClient.h>
 #include <Preferences.h>
-#include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <mbedtls/sha256.h>
 #include <sys/time.h>
@@ -348,7 +347,6 @@ int CloudSync::send(const char* action, const String& query, const uint8_t* byte
   http.setConnectTimeout(8000);
   http.setTimeout(15000);
   http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-  setRadioAwake(true);
   if (!http.begin(client_, url_ + "/api/device/" + action + query)) return 0;
   socketOpen_ = true;  // even a failed attempt leaves a socket worth closing
   http.addHeader("OAI-Sites-Authorization", "Bearer " + bypass_);
@@ -358,30 +356,33 @@ int CloudSync::send(const char* action, const String& query, const uint8_t* byte
   // HTTPClient omits Content-Length for an empty body; some front ends reject such POSTs.
   if (post && !size) http.addHeader("Content-Length", "0");
   // Redirects are never followed with credentials; log where the host wanted to send us.
-  const char* collect[] = {"Location"};
-  http.collectHeaders(collect, 1);
+  const char* collect[] = {"Location", "Connection"};
+  http.collectHeaders(collect, 2);
   const int code = post ? http.POST(const_cast<uint8_t*>(bytes), size) : http.GET();
   body_ = code > 0 ? http.getString() : "";
   location = code >= 300 && code < 400 ? http.header("Location") : String();
+  keepAlive_ = http.header("Connection");
   http.end();  // leaves the socket open for reuse when the site allows it
   return code;
 }
 
 void CloudSync::closeConnection() {
-  setRadioAwake(false);
   if (!socketOpen_) return;
   client_.stop();
   socketOpen_ = false;
 }
 
-void CloudSync::setRadioAwake(bool awake) {
-  if (radioAwake_ == awake) return;
-  // Station modem sleep parks the radio between beacons, so every round trip
-  // waits for the next wake-up: the board needed about 4.2 s per request where
-  // the same site answered a laptop in 0.9 s. Stay awake only while syncing at
-  // home; recording away keeps the default power saving.
-  WiFi.setSleep(!awake);
-  radioAwake_ = awake;
+void CloudSync::selfTest(uint8_t rounds) {
+  // Times back-to-back requests without touching stored data: the id cannot
+  // exist, so the site just answers "not complete, offset 0".
+  if (!enabled_) {
+    Serial.println("ERROR,cloud_unconfigured");
+    return;
+  }
+  const String query =
+      "?id=00000000&sha=0000000000000000000000000000000000000000000000000000000000000000&size=4096";
+  for (uint8_t i = 0; i < rounds; ++i) request("status", query);
+  closeConnection();
 }
 
 CloudSync::Result CloudSync::request(const char* action, const String& query,
@@ -390,7 +391,14 @@ CloudSync::Result CloudSync::request(const char* action, const String& query,
   int code = 0;
   for (int attempt = 0; attempt < 2; ++attempt) {
     const bool reused = client_.connected();
+    const uint32_t started = millis();
+    keepAlive_ = "";
     code = send(action, query, bytes, size, post, location);
+    // Where upload time goes: reused says whether the socket survived the
+    // previous request, conn is what the site answered about keeping it.
+    Serial.printf("STATUS,cloud_timing,action=%s,reused=%d,bytes=%u,code=%d,ms=%lu,conn=%.20s\n",
+                  action, reused ? 1 : 0, unsigned(size), code,
+                  (unsigned long)(millis() - started), keepAlive_.c_str());
     if (code > 0) break;
     // A kept-open socket may have been closed by the site while idle: drop it and
     // try once more with a fresh handshake before reporting a failure.

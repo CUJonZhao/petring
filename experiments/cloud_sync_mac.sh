@@ -4,6 +4,7 @@
 #   bash experiments/cloud_sync_mac.sh probe     # tools + serial port
 #   bash experiments/cloud_sync_mac.sh build     # compile only
 #   bash experiments/cloud_sync_mac.sh flash     # compile + normal upload (keeps data partitions)
+#   bash experiments/cloud_sync_mac.sh cloudtest # time three site requests from the board (1 min)
 #   bash experiments/cloud_sync_mac.sh validate  # provision + simulated walk + cloud receipt
 #   bash experiments/cloud_sync_mac.sh all       # flash, then validate (stops on failure)
 set -u -o pipefail
@@ -41,6 +42,9 @@ pick_python() {
       cd "$ROOT/firmware/imu_raw_stream" && "$PIO" run ;;
     flash)
       cd "$ROOT/firmware/imu_raw_stream" && "$PIO" run -t upload ;;
+    cloudtest)
+      PY="$(pick_python)" || { echo "need a python with pyserial and requests"; exit 2; }
+      "$PY" "$ROOT/experiments/cloud_self_test.py" --config "$CONFIG" ;;
     validate)
       PY="$(pick_python)" || { echo "need a python with pyserial and requests"; exit 2; }
       "$PY" "$ROOT/experiments/validate_cloud_sync.py" --config "$CONFIG" \

@@ -38,7 +38,8 @@ class CloudSync {
   int send(const char* action, const String& query, const uint8_t* bytes, size_t size,
            bool post, String& location);
   void closeConnection();
-  void setRadioAwake(bool awake);
+  // Read-only probe of the site's status endpoint, for timing only (serial "T").
+  void selfTest(uint8_t rounds = 3);
   bool confirmed() const;
   std::vector<Entry> scan();
   bool selectFile();
@@ -54,11 +55,11 @@ class CloudSync {
   WiFiClientSecure client_;  // kept open between chunks; one TLS handshake per burst
   String url_, bypass_, token_, body_;
   String path_, id_, sha_, query_, state_;
-  String mode_ = "unconfigured", error_;
+  String mode_ = "unconfigured", error_, keepAlive_;
   size_t size_ = 0, offset_ = 0;
   bool enabled_ = false, atHome_ = false, knownOffset_ = false;
   bool wasRecording_ = false, holdUntilHome_ = false, rejectsCleared_ = false;
-  bool socketOpen_ = false, radioAwake_ = false;
+  bool socketOpen_ = false;
   uint32_t awaySince_ = 0, homeSince_ = 0, startRetryAt_ = 0, retryAt_ = 0;
   uint32_t lastHeartbeat_ = 0, lastScan_ = 0, lastPruneCheck_ = 0;
   uint32_t pending_ = 0, synced_ = 0, rejected_ = 0, uploaded_ = 0, pruned_ = 0;
