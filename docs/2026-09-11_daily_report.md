@@ -99,6 +99,14 @@ flowchart LR
 最新一段 1,543 条的网页显示「未覆盖 2.8 秒」，与设备端实测的 3.1% 吻合；旧固件那段是 19.6%，对比明显。
 小问题：网站导出的 CSV 用完整浮点精度（会出现 `-0.35000000000000003`），比设备端导出大约大 50%，属于可改进项，需要在 Codex 中改并部署。
 
+## 活动分析（离线，尚未标定）
+
+`experiments/gait_analysis.py` 从一段记录算出：静止／走／跑的时间预算、相对活动指数、步频曲线和图。方法是 4 秒窗口、2 秒步进，特征为合加速度的 MAD（平均振幅偏差，毫 g）、ENMO、陀螺仪幅度，以及 0.5–5 Hz 带内的主频与周期性。20 Hz 采样的奈奎斯特是 10 Hz，足以分辨 1–4 Hz 的步频。
+
+在 20 Hz 下 MAD 比 ENMO 区分度好得多：桌面实测中，手动摆弄板子时 MAD 约 100 mg、静止 0.7 mg，而两者的平均 ENMO 都低于 30 mg。因此分类和活动指数都用 MAD，ENMO 仅作为与人体加速度计文献对照的参考值。
+
+**当前阈值是占位值，没有标定。** 需要一段带标签的数据（`--labels` 加 `--suggest` 会给出分界建议并输出混淆矩阵）。另外：加速度计不能测能量消耗，行业做法是先用间接测热法把活动计数回归到实测能耗上，且随设备与佩戴位置而变；所以这里只给相对活动指数，不给千卡。
+
 ## 限制与风险
 
 - 网站托管在 ChatGPT Sites：修改网站需要在 Codex／ChatGPT 中部署；Claude 会话无法访问或部署该网站。
@@ -124,7 +132,8 @@ flowchart LR
 | 同步固件 | [cloud_sync.h](../firmware/imu_raw_stream/src/cloud_sync.h)、[cloud_sync.cpp](../firmware/imu_raw_stream/src/cloud_sync.cpp)、[根证书](../firmware/imu_raw_stream/src/cloud_ca.h)、[main.cpp](../firmware/imu_raw_stream/src/main.cpp)、[记录器](../firmware/imu_raw_stream/src/motion_logger.cpp)、[手机页面](../firmware/imu_raw_stream/src/records_page.h) |
 | Mac 脚本与实机验证 | [cloud_sync_mac.sh](../experiments/cloud_sync_mac.sh)、[validate_cloud_sync.py](../experiments/validate_cloud_sync.py) |
 | 自动化检查 | [主机模拟](../firmware/imu_raw_stream/tests/cloud_sync_sim/)、[同步面板浏览器测试](../firmware/imu_raw_stream/tests/records_cloud_panel_test.cjs) |
-| 实机分析工具 | [运行分析](../experiments/analyze_cloud_sync_run.py)、[网站延迟测量](../experiments/measure_cloud_latency.py) |
+| 实机分析工具 | [运行分析](../experiments/analyze_cloud_sync_run.py)、[网站延迟测量](../experiments/measure_cloud_latency.py)、[串口计时探测](../experiments/cloud_self_test.py) |
+| 活动分析（离线） | [步态与活动量分析](../experiments/gait_analysis.py) |
 | 说明 | [同步说明](2026-09-11_home_wifi_cloud_sync.md)、[固件说明](../firmware/imu_raw_stream/README.md) |
 
 网站凭据和刷写前的整片备份留在本地 `data/raw/cloud_sync_20260911/`，由 `.gitignore` 排除，不可提交或公开。
