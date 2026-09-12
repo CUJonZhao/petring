@@ -8,7 +8,11 @@ sessions in a phone browser, and sync them automatically to a private website
 after the board returns to home Wi-Fi. A harness-mounted walking monitor is being explored
 because of the assembled enclosure's size; wearing/dog tests are deferred.
 
-**Latest (2026-09-12):** Website source is now backed up in the private [petring-site repository](https://github.com/CUJonZhao/petring-site). The analysis update has passed type checking and a production build; current publication status is recorded in [the website handoff](docs/2026-09-12_site_handoff.md).
+**Latest (2026-09-12):** The one-hour unattended battery-only bench run passed:
+63 min 02 s without a reset, with voltage falling from 3.914 to 3.756 V. It
+validated runtime and voltage logging, but did not make a motion recording; see
+[the battery bench result](experiments/battery_bench_1h_2026-09-12.md). Website
+source is now backed up in the private [petring-site repository](https://github.com/CUJonZhao/petring-site), and the analysis update is live.
 
 **Resume here (2026-09-11):** [Today's report / 今日报告](docs/2026-09-11_daily_report.md) ·
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
@@ -18,8 +22,8 @@ uploads it to the private site, and frees space only from cloud-confirmed sessio
 started from movement alone while still on home Wi-Fi, ended itself after five minutes
 of stillness, uploaded, and appeared on the private site: 6,724 samples at 19.53 Hz.
 Rest/walk is calibrated from a labelled indoor recording (149/149 windows agreed); the
-run boundary is not. Open: wearing it on Delta's harness, the site-side analysis deploy,
-and one-hour battery runtime.
+run boundary is not. Open: a one-hour recorded battery run and wearing it on
+Delta's harness.
 
 Previous (2026-09-09): [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
 [Firmware handoff / 软件交接](docs/2026-09-09_offline_motion_logging.md).
@@ -27,8 +31,9 @@ The user has reported v0.4 printing and assembly complete. The offline recorder
 has now been backed up/upgraded and tested on the board: a two-minute USB run
 saved 2,279 samples through a Wi-Fi-off interval; CSV/binary comparison and
 restart persistence passed. See the [physical report](experiments/offline_usb_bench_2026-09-09.md).
-Average sampling was 18.97 Hz with flash-write timing gaps. One-hour battery
-testing remains pending; wearing/dog testing is explicitly deferred.
+Average sampling was 18.97 Hz with flash-write timing gaps. The one-hour
+battery supply test has now passed; a one-hour *recorded* battery session and
+wearing/dog testing remain pending.
 Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.md).
 
 - [Current print package](hardware/enclosure/print_packages/delta_collar_v0_4_fit_print_20260909.zip)
@@ -42,7 +47,8 @@ Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.m
 
 Current status: Stage 1B home Wi-Fi auto-sync is implemented and passed a physical
 bench end to end (record away, auto-close at home, upload, site confirmation).
-Sampling timing refinement, a real walk and one-hour battery validation remain pending.
+The one-hour battery supply validation has passed. A real walk and a one-hour
+recorded battery session remain pending.
 
 Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
 LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
@@ -52,7 +58,7 @@ current enclosure is larger than desired for Delta.
 
 Stage 1B focuses on:
 
-- Longer battery-only bench runtime testing.
+- One-hour battery-only recording and recovery testing.
 - Full-resolution data capture and automatic summary plots.
 - Activity/rest threshold review from repeatable bench and hand-motion tests.
 - Documenting the completed v0.4 enclosure and its remaining fit/retention details.
@@ -112,8 +118,8 @@ Recommended next steps:
 2. Review/download the real short recording in the phone-friendly `/records` page.
 3. If fixed-rate behavior analysis is required, decouple sampling from synchronous
    flash writes and recheck interval distribution.
-4. Run a one-hour battery-only desktop capture and inspect actual sampling gaps,
-   voltage trend, flash usage and full-session retrieval.
+4. Run a one-hour manual recording on battery power and inspect actual sampling
+   gaps, voltage trend, flash usage, full-session retrieval, and home upload.
 5. Use real recordings to refine activity reports. Do not advance wearing/dog
    testing until the user resumes that work.
 
