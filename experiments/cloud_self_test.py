@@ -17,7 +17,8 @@ import serial
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--config", type=Path, required=True)
-    p.add_argument("--seconds", type=int, default=60)
+    p.add_argument("--seconds", type=int, default=90)
+    p.add_argument("--boot", type=int, default=25, help="seconds to wait for boot and Wi-Fi")
     a = p.parse_args()
     c = json.loads(a.config.read_text())
     s = serial.Serial(port=None, baudrate=115200, timeout=0.2)
@@ -25,17 +26,28 @@ def main():
     s.rts = False
     s.port = c["port"]
     s.open()
-    try:
-        s.write(b"NQT")
-        end = time.monotonic() + a.seconds
+    def drain(seconds, count=0):
+        """Read for a while; return how many timing lines appeared."""
         seen = 0
+        end = time.monotonic() + seconds
         while time.monotonic() < end:
             line = s.readline().decode(errors="replace").strip()
             if line.startswith(("STATUS", "ERROR", "{")):
                 print(line, flush=True)
-                seen += line.startswith("STATUS,cloud_timing")
-                if seen >= 3:
-                    break
+                if line.startswith("STATUS,cloud_timing"):
+                    seen += 1
+                    if count and seen >= count:
+                        return seen
+        return seen
+
+    try:
+        # Opening the port resets the board on this adapter, and bytes sent
+        # during boot are lost, so wait for it to come up and join Wi-Fi first.
+        drain(a.boot)
+        s.write(b"NQT")
+        if not drain(a.seconds // 2, count=3):
+            s.write(b"T")  # the board may have still been connecting
+            drain(a.seconds // 2, count=3)
     finally:
         s.close()
 

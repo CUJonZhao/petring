@@ -1,6 +1,5 @@
 #include "cloud_sync.h"
 
-#include <HTTPClient.h>
 #include <Preferences.h>
 #include <WiFiClientSecure.h>
 #include <mbedtls/sha256.h>
@@ -53,6 +52,16 @@ void removeIfPresent(fs::FS& fs, const String& path) {
 void CloudSync::begin() {
   client_.setCACert(kCloudRootCA);
   client_.setHandshakeTimeout(12);
+  // Configured once: the TLS handshake costs about 3 s on this board, so the
+  // socket is kept for the whole sync burst.
+  http_.setReuse(true);
+  http_.setConnectTimeout(8000);
+  http_.setTimeout(15000);
+  http_.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+  // Redirects are never followed with credentials; log where the host wanted to
+  // send us, and what it says about keeping the connection.
+  static const char* kCollect[] = {"Location", "Connection"};
+  http_.collectHeaders(kCollect, 2);
   Preferences p;
   if (p.begin("delta-cloud", true)) {
     url_ = p.getString("url", "");
@@ -341,28 +350,19 @@ void CloudSync::fail(Result result, uint32_t now) {
 
 int CloudSync::send(const char* action, const String& query, const uint8_t* bytes, size_t size,
                     bool post, String& location) {
-  HTTPClient http;
-  // Keep the TLS session for the next chunk: the handshake dominated upload time.
-  http.setReuse(true);
-  http.setConnectTimeout(8000);
-  http.setTimeout(15000);
-  http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-  if (!http.begin(client_, url_ + "/api/device/" + action + query)) return 0;
+  if (!http_.begin(client_, url_ + "/api/device/" + action + query)) return 0;
   socketOpen_ = true;  // even a failed attempt leaves a socket worth closing
-  http.addHeader("OAI-Sites-Authorization", "Bearer " + bypass_);
-  http.addHeader("Authorization", "Bearer " + token_);
-  http.addHeader("Content-Type",
-                 strcmp(action, "heartbeat") == 0 ? "application/json" : "application/octet-stream");
+  http_.addHeader("OAI-Sites-Authorization", "Bearer " + bypass_);
+  http_.addHeader("Authorization", "Bearer " + token_);
+  http_.addHeader("Content-Type",
+                  strcmp(action, "heartbeat") == 0 ? "application/json" : "application/octet-stream");
   // HTTPClient omits Content-Length for an empty body; some front ends reject such POSTs.
-  if (post && !size) http.addHeader("Content-Length", "0");
-  // Redirects are never followed with credentials; log where the host wanted to send us.
-  const char* collect[] = {"Location", "Connection"};
-  http.collectHeaders(collect, 2);
-  const int code = post ? http.POST(const_cast<uint8_t*>(bytes), size) : http.GET();
-  body_ = code > 0 ? http.getString() : "";
-  location = code >= 300 && code < 400 ? http.header("Location") : String();
-  keepAlive_ = http.header("Connection");
-  http.end();  // leaves the socket open for reuse when the site allows it
+  if (post && !size) http_.addHeader("Content-Length", "0");
+  const int code = post ? http_.POST(const_cast<uint8_t*>(bytes), size) : http_.GET();
+  body_ = code > 0 ? http_.getString() : "";
+  location = code >= 300 && code < 400 ? http_.header("Location") : String();
+  keepAlive_ = http_.header("Connection");
+  http_.end();  // keeps the socket open for the next request
   return code;
 }
 

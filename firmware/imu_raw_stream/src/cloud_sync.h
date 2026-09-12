@@ -1,4 +1,5 @@
 #pragma once
+#include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 
 #include <vector>
@@ -52,7 +53,10 @@ class CloudSync {
   void fail(Result result, uint32_t now);
 
   MotionLogger& logger_;
-  WiFiClientSecure client_;  // kept open between chunks; one TLS handshake per burst
+  // Both must outlive a request: ~HTTPClient() stops its client, so a
+  // per-request HTTPClient would close the socket it just kept open.
+  WiFiClientSecure client_;
+  HTTPClient http_;
   String url_, bypass_, token_, body_;
   String path_, id_, sha_, query_, state_;
   String mode_ = "unconfigured", error_, keepAlive_;
