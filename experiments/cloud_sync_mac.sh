@@ -20,6 +20,7 @@ mkdir -p "$OUT"
 LOG="$OUT/${STEP}_${STAMP}.log"
 PIO="$(command -v pio || command -v platformio || true)"
 [ -z "$PIO" ] && [ -x "$HOME/.platformio/penv/bin/pio" ] && PIO="$HOME/.platformio/penv/bin/pio"
+[ -z "$PIO" ] && [ -x /tmp/petring-firmware-env/bin/pio ] && PIO=/tmp/petring-firmware-env/bin/pio
 pick_python() {
   for py in python3 "$HOME/.platformio/penv/bin/python"; do
     if command -v "$py" >/dev/null 2>&1 && "$py" -c 'import serial, requests' >/dev/null 2>&1; then

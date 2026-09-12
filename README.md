@@ -12,8 +12,10 @@ because of the assembled enclosure's size; wearing/dog tests are deferred.
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
 The board records by itself away from home Wi-Fi, closes the session after it reconnects,
 uploads it to the private site, and frees space only from cloud-confirmed sessions.
-Firmware revisions pass host checks but are **not yet flashed or validated on the board**;
-next step on the Mac: `bash experiments/cloud_sync_mac.sh all`.
+**Validated on the board (2026-09-11):** a 70 s simulated outing recorded itself,
+closed automatically on returning to home Wi-Fi, uploaded, and the site confirmed the
+same SHA-256; resumable upload and cloud-confirmed cleanup were exercised in the same run.
+A real walk, one-hour battery runtime, and the away sampling rate (15.2 Hz measured) are open.
 
 Previous (2026-09-09): [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
 [Firmware handoff / 软件交接](docs/2026-09-09_offline_motion_logging.md).
@@ -34,10 +36,9 @@ Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.m
 
 ## Current Stage
 
-Current status: Stage 1B home Wi-Fi auto-sync firmware and private website are
-implemented; the firmware awaits ESP32 build/flash and physical upload validation.
-Offline recording and its USB short bench passed; sampling timing refinement and
-one-hour battery validation remain pending.
+Current status: Stage 1B home Wi-Fi auto-sync is implemented and passed a physical
+bench end to end (record away, auto-close at home, upload, site confirmation).
+Sampling timing refinement, a real walk and one-hour battery validation remain pending.
 
 Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
 LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
@@ -102,8 +103,8 @@ Stage 1 intentionally does not include medical diagnosis, production waterproofi
 
 Recommended next steps:
 
-1. Flash and validate home Wi-Fi sync: `bash experiments/cloud_sync_mac.sh all`,
-   then confirm the session on the private site and take one real short walk.
+1. Confirm the uploaded session on the private site, let the board finish its
+   2.3 MiB backlog at home, then take one real short walk end to end.
 2. Review/download the real short recording in the phone-friendly `/records` page.
 3. If fixed-rate behavior analysis is required, decouple sampling from synchronous
    flash writes and recheck interval distribution.

@@ -287,9 +287,18 @@ void CloudSync::upload(uint32_t now) {
       error_ = "upload_memory_low";
       r = Result::retry;
     } else {
-      if (upload_.seek(offset_) && upload_.read(chunk, n) == n)
+      // Keep a file descriptor only during the disk read, never across HTTPS.
+      // ESP32/newlib fseek on a retained stream failed after a TLS request in
+      // the physical bench. Reopen each immutable chunk at its saved offset.
+      File source = logger_.fs_.open(path_, "r");
+      const bool seekOk = source && (!offset_ || source.seek(offset_));
+      const size_t got = seekOk ? source.read(chunk, n) : 0;
+      if (source) source.close();
+      if (seekOk && got == n)
         r = request("chunk", query_ + "&offset=" + String(unsigned(offset_)), chunk, n, true);
       else {
+        Serial.printf("STATUS,cloud_read_failed,id=%s,seek=%d,offset=%u,wanted=%u,got=%u,file_size=%u\n",
+                      id_.c_str(), seekOk, unsigned(offset_), unsigned(n), unsigned(got), unsigned(size_));
         error_ = "file_read_failed";
         r = Result::retry;
       }
@@ -427,13 +436,6 @@ bool CloudSync::selectFile() {
     return false;
   }
   query_ = "?id=" + id_ + "&sha=" + sha_ + "&size=" + String(unsigned(size_));
-  upload_ = logger_.fs_.open(path_, "r");
-  if (!upload_) {
-    error_ = "file_open_failed";
-    markFile(".retry");
-    clearTransfer();
-    return false;
-  }
   offset_ = 0;
   knownOffset_ = false;
   Serial.printf("STATUS,cloud_upload,id=%s,state=%s,bytes=%u\n", id_.c_str(), state_.c_str(),
@@ -542,7 +544,6 @@ void CloudSync::markDone() {
 }
 
 void CloudSync::clearTransfer() {
-  if (upload_) upload_.close();
   path_ = "";
   id_ = "";
   sha_ = "";

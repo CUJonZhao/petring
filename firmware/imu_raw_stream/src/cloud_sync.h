@@ -47,7 +47,6 @@ class CloudSync {
   String url_, bypass_, token_, body_;
   String path_, id_, sha_, query_, state_;
   String mode_ = "unconfigured", error_;
-  File upload_;
   size_t size_ = 0, offset_ = 0;
   bool enabled_ = false, atHome_ = false, knownOffset_ = false;
   bool wasRecording_ = false, holdUntilHome_ = false, rejectsCleared_ = false;
