@@ -37,9 +37,12 @@ MIN_COVERAGE = 0.6          # a window with more gap than this is not classified
 MAX_INTERPOLATION_MS = 250  # never interpolate across a longer sampling gap
 BAND_HZ = (0.5, 5.0)        # canine/human stride fundamentals live here
 CLASSES = ("rest", "walk", "run")
-# Placeholders. Replace from --suggest output once labelled data exists.
-DEFAULT_THRESHOLDS = {"rest_max_mad_mg": 40.0, "run_min_mad_mg": 450.0,
-                      "run_stride_hz": 2.6, "run_stride_min_mad_mg": 250.0}
+# rest/walk is calibrated (2026-09-11, hand-carried indoor walk: rest p90 4.2 mg,
+# walk p10 102.9 mg, 149/149 windows agreed). The run boundary is NOT calibrated:
+# nobody has run with the board yet, so it is an amplitude guess above the
+# transients seen when the board is set down (up to ~610 mg).
+DEFAULT_THRESHOLDS = {"rest_max_mad_mg": 50.0, "run_min_mad_mg": 600.0}
+CALIBRATION = "human-walk-2026-09-11 (rest/walk only)"
 
 
 def load_samples(path: Path):
@@ -145,11 +148,12 @@ def classify(rows, thresholds):
         if "mad_mg" not in row:
             row["class"] = "uncovered"
             continue
-        mad, stride = row["mad_mg"], row.get("stride_hz", 0.0)
+        # Amplitude only: the dominant frequency proved unreliable when the board
+        # is hand-carried (it locked onto a harmonic), so it stays a diagnostic.
+        mad = row["mad_mg"]
         if mad < thresholds["rest_max_mad_mg"]:
             row["class"] = "rest"
-        elif mad >= thresholds["run_min_mad_mg"] or (
-                stride >= thresholds["run_stride_hz"] and mad >= thresholds["run_stride_min_mad_mg"]):
+        elif mad >= thresholds["run_min_mad_mg"]:
             row["class"] = "run"
         else:
             row["class"] = "walk"
@@ -159,6 +163,11 @@ def classify(rows, thresholds):
         window = [smoothed[i - 1], rows[i]["class"], smoothed[i + 1]]
         if window[0] == window[2] != window[1] and "uncovered" not in window:
             rows[i]["class"] = window[0]
+    # The edges have only one neighbour; a lone first or last window is noise
+    # (setting the board down produced one 610 mg window at the start).
+    for first, second in ((0, 1), (len(rows) - 1, len(rows) - 2)):
+        if len(rows) > 2 and rows[first]["class"] != "uncovered" and rows[second]["class"] != "uncovered":
+            rows[first]["class"] = rows[second]["class"]
     return rows
 
 
@@ -227,7 +236,6 @@ def calibrate(rows, labels):
         suggestion["rest_max_mad_mg"] = round((report["rest"]["mad_mg"]["p90"] + report["walk"]["mad_mg"]["p10"]) / 2, 1)
     if "walk" in report and "run" in report:
         suggestion["run_min_mad_mg"] = round((report["walk"]["mad_mg"]["p90"] + report["run"]["mad_mg"]["p10"]) / 2, 1)
-        suggestion["run_stride_hz"] = round((report["walk"]["stride_hz_median"] + report["run"]["stride_hz_median"]) / 2, 2)
     return {"per_label": report, "suggested_thresholds": suggestion,
             "accuracy": accuracy(rows, labels)}
 
@@ -297,10 +305,10 @@ def main():
         thresholds.update(json.loads(a.config.read_text()))
     times, accel, gyro, battery, started = load_samples(a.session)
     rows = classify(windows(times, accel, gyro), thresholds)
-    report = {"session": a.session.name, "thresholds": thresholds,
+    report = {"session": a.session.name, "thresholds": thresholds, "calibration": CALIBRATION,
               "calibrated": bool(a.config), "summary": summarize(rows, times, battery)}
     if not a.config:
-        report["warning"] = "thresholds are placeholders; calibrate with --labels --suggest before trusting the split"
+        report["warning"] = "rest/walk is calibrated for a hand-carried board; the run boundary is not calibrated at all"
     if a.labels:
         report["calibration"] = calibrate(rows, read_labels(a.labels, started))
         if not a.suggest:

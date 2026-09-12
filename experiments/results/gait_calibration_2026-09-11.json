@@ -1,0 +1,91 @@
+{
+  "recording": {
+    "id": "ce940dee",
+    "trigger": "m (sustained motion, indoors, still on home Wi-Fi)",
+    "started": "2026-09-11T23:15:43-04:00",
+    "uploaded": "2026-09-11T23:21:49-04:00",
+    "samples": 6724,
+    "duration_s": 344.2,
+    "mean_rate_hz": 19.53,
+    "uncovered_s": 2.0,
+    "battery_v": {
+      "start": 3.878,
+      "end": 3.882,
+      "drop_mv": -4
+    },
+    "note": "raw file stays in the ignored data/raw tree; the site holds the same session"
+  },
+  "protocol": "board carried by hand indoors: trigger walk, 2 min still, ~1.5 min normal walk, ~1 min fast walk, then still until the 5 min rule ended the session",
+  "labels_s": [
+    [
+      12,
+      118,
+      "rest"
+    ],
+    [
+      130,
+      215,
+      "walk"
+    ],
+    [
+      222,
+      268,
+      "walk"
+    ],
+    [
+      280,
+      340,
+      "rest"
+    ]
+  ],
+  "per_label": {
+    "rest": {
+      "windows": 83,
+      "mad_mg": {
+        "p10": 0.9,
+        "median": 1.2,
+        "p90": 4.2
+      },
+      "stride_hz_median": 3.0
+    },
+    "walk": {
+      "windows": 66,
+      "mad_mg": {
+        "p10": 102.9,
+        "median": 151.2,
+        "p90": 195.5
+      },
+      "stride_hz_median": 2.46
+    }
+  },
+  "agreement": {
+    "labelled_windows": 149,
+    "agreement": 1.0,
+    "confusion_label_to_class": {
+      "rest": {
+        "rest": 83
+      },
+      "walk": {
+        "walk": 66
+      }
+    }
+  },
+  "thresholds": {
+    "rest_max_mad_mg": 50.0,
+    "run_min_mad_mg": 600.0,
+    "calibrated": "rest/walk only, hand-carried human walking",
+    "not_calibrated": "run: nobody has run with the board; 600 mg is a guess above the ~610 mg transient seen when it was set down",
+    "applies_to": "this device and this mounting; a dog wearing it on a harness needs its own calibration"
+  },
+  "findings": [
+    "rest and walk separate by a factor of about 25 (rest p90 4.2 mg, walk p10 102.9 mg), so the boundary is not sensitive: 149 of 149 labelled windows agreed",
+    "the dominant frequency is not a reliable cadence when the board is hand-carried: the normal-walk phase read 3.0-4.0 Hz (a harmonic) while the faster phase read 1.85 Hz, so classification uses amplitude only and the frequency is reported as a diagnostic",
+    "a single 610 mg window when the board was set down was classified as run; lone first/last windows now follow their neighbour"
+  ],
+  "summary_with_calibrated_thresholds": {
+    "rest": 180.0,
+    "walk": 162.0,
+    "run": 0.0
+  },
+  "activity_index_mad_mg": 80.0
+}
