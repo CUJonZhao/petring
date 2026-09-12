@@ -12,10 +12,12 @@ because of the assembled enclosure's size; wearing/dog tests are deferred.
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
 The board records by itself away from home Wi-Fi, closes the session after it reconnects,
 uploads it to the private site, and frees space only from cloud-confirmed sessions.
-**Validated on the board (2026-09-11):** a 70 s simulated outing recorded itself,
-closed automatically on returning to home Wi-Fi, uploaded, and the site confirmed the
-same SHA-256; resumable upload and cloud-confirmed cleanup were exercised in the same run.
-A real walk, one-hour battery runtime, and the away sampling rate (15.2 Hz measured) are open.
+**Validated on the board (2026-09-11):** the loop now runs unattended. A session
+started from movement alone while still on home Wi-Fi, ended itself after five minutes
+of stillness, uploaded, and appeared on the private site: 6,724 samples at 19.53 Hz.
+Rest/walk is calibrated from a labelled indoor recording (149/149 windows agreed); the
+run boundary is not. Open: wearing it on Delta's harness, the site-side analysis deploy,
+and one-hour battery runtime.
 
 Previous (2026-09-09): [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
 [Firmware handoff / 软件交接](docs/2026-09-09_offline_motion_logging.md).
