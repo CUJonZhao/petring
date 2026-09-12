@@ -74,13 +74,22 @@ flowchart LR
 
 | 项目 | 实测 |
 |---|---|
-| 外出记录 | 1,071 条，70.4 秒，平均 15.22 Hz；间隔中位数 50 ms，最大 760 ms；大于 100 ms 的间隔 61 段合计 20.0 秒 |
-| 回家自动结束 | 恢复 Wi-Fi 后约 26 秒 |
-| 上传速度 | 每次 HTTPS 请求阻塞主循环中位数 4.8 秒、p90 10.3 秒；16 KiB 一块，约 3 KB/s |
-| 板上积压 | 10 段共 2.30 MiB（含旧固件遗留的 1.75 MiB 与 526 KiB 中断记录），在家自动陆续上传 |
-| 电池电压 | 4.202 V（USB 供电，未做续航测试） |
+| 项目 | 首次实机（改动前） | 两次复测（改动后） |
+|---|---|---|
+| 外出采样 | 15.22 Hz | **19.46 / 19.43 Hz** |
+| 未覆盖时间 | 28.5%（61 段间隔／70 秒） | **3.1% / 3.7%**（13 段／79 秒、16 段／76 秒） |
+| 最大采样间隔 | 760 ms | 366 / 325 ms |
+| 一段外出记录 | 1,071 条 | 1,543 条、1,470 条 |
+| 上传请求阻塞 | 中位 4.8 秒、p90 10.3 秒 | 首个（含握手）8.0–9.7 秒，之后约 4.2 秒 |
+| 回家自动结束 | 恢复 Wi-Fi 后约 26 秒 | 同上 |
+| 电池电压 | 4.202 V（USB 供电，未做续航测试） | — |
 
-外出采样 15.22 Hz 低于 9 月 9 日桌面基准的 18.97 Hz，约 28% 的时间落在大于 100 ms 的间隔里，原因待排查。
+三次运行的网站回执都确认了相同的 SHA-256。两次复测之间，板子自己把 10 段共 2.30 MiB 积压全部传完，并按策略删除了已确认的旧记录（含 1.75 MiB 的 `82ce2b54`），复测开始时待上传为 0——存储策略在实机上按预期工作。
+
+## 针对首次实测的两项改动
+
+1. **采样间隙**：定位到每次落盘都会调用一次遍历整个文件系统的剩余空间统计，分区越满越慢（近空盘 133 ms → 半满 317 ms），间隙节奏与每秒落盘一致，与 Wi-Fi 无关。改为缓存估计值（空间充足 30 秒刷新一次，接近保留区 5 秒一次），真实写入失败仍会停止记录并复核。**复测确认采样回到 19.4 Hz。**
+2. **上传速度**：改为复用同一个 TLS 连接。**复测显示握手确实省掉了，但每个请求仍约 4.2 秒，且与请求体大小无关**（0 字节的 complete 请求也要 4.6 秒），所以瓶颈既不是握手也不是带宽。下一步先用 `experiments/measure_cloud_latency.py` 从 Mac 测同一接口，判断是不是网站端响应时间；若是，则只能减少请求数（增大分块，需同时修改并部署网站）。
 
 ## 限制与风险
 
@@ -95,9 +104,9 @@ flowchart LR
 
 1. 登录网站确认 `e1c527b1` 的曲线、CSV 与原始文件下载正常；让板子在家开着，把剩余 2.30 MiB 积压传完后再看一次（应共 10 段）。
 2. 实际出门短走一次，回家后确认网站自动出现新记录，这是真正的端到端验收。
-3. 排查外出采样率（15.22 Hz）：解耦采样与闪存写入，并确认热点与每 15 秒重连的影响。
+3. 判断上传的 4.2 秒来自哪里：`python3 experiments/measure_cloud_latency.py --config data/raw/cloud_sync_20260911/secrets.config.json`。若 Mac 上同样是数秒，就是网站端响应时间，只能靠增大分块减少请求数（需同时部署网站）。
 4. 一小时电池记录；评估外出时是否关闭热点以省电。
-5. 如需更快上传：复用 TLS 连接（固件改动即可）或增大分块（需同步修改并部署网站）。
+5. 采样已恢复到 19.4 Hz，剩余约 3% 的未覆盖时间来自落盘本身，暂不处理。
 6. 如需修改网站，在 Codex 中修改并部署 `site/`。
 
 ## 今天归档的文件
@@ -107,6 +116,7 @@ flowchart LR
 | 同步固件 | [cloud_sync.h](../firmware/imu_raw_stream/src/cloud_sync.h)、[cloud_sync.cpp](../firmware/imu_raw_stream/src/cloud_sync.cpp)、[根证书](../firmware/imu_raw_stream/src/cloud_ca.h)、[main.cpp](../firmware/imu_raw_stream/src/main.cpp)、[记录器](../firmware/imu_raw_stream/src/motion_logger.cpp)、[手机页面](../firmware/imu_raw_stream/src/records_page.h) |
 | Mac 脚本与实机验证 | [cloud_sync_mac.sh](../experiments/cloud_sync_mac.sh)、[validate_cloud_sync.py](../experiments/validate_cloud_sync.py) |
 | 自动化检查 | [主机模拟](../firmware/imu_raw_stream/tests/cloud_sync_sim/)、[同步面板浏览器测试](../firmware/imu_raw_stream/tests/records_cloud_panel_test.cjs) |
+| 实机分析工具 | [运行分析](../experiments/analyze_cloud_sync_run.py)、[网站延迟测量](../experiments/measure_cloud_latency.py) |
 | 说明 | [同步说明](2026-09-11_home_wifi_cloud_sync.md)、[固件说明](../firmware/imu_raw_stream/README.md) |
 
 网站凭据和刷写前的整片备份留在本地 `data/raw/cloud_sync_20260911/`，由 `.gitignore` 排除，不可提交或公开。
