@@ -8,6 +8,8 @@ sessions in a phone browser, and sync them automatically to a private website
 after the board returns to home Wi-Fi. A harness-mounted walking monitor is being explored
 because of the assembled enclosure's size; wearing/dog tests are deferred.
 
+**Latest (2026-09-12):** Website source is now backed up in the private [petring-site repository](https://github.com/CUJonZhao/petring-site). The analysis update has passed type checking and a production build; current publication status is recorded in [the website handoff](docs/2026-09-12_site_handoff.md).
+
 **Resume here (2026-09-11):** [Today's report / 今日报告](docs/2026-09-11_daily_report.md) ·
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
 The board records by itself away from home Wi-Fi, closes the session after it reconnects,
