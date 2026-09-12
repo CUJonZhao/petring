@@ -95,7 +95,7 @@ const char* MotionLogger::stateFor(const String& path) {
   return recording_ && path == "/" + id_ + ".open" ? "recording" : "interrupted";
 }
 
-bool MotionLogger::start(uint64_t unixMs) {
+bool MotionLogger::start(uint64_t unixMs, uint8_t trigger) {
   if (recording_) return true;
   if (!ready_) return false;
   refreshFree();
@@ -116,7 +116,7 @@ bool MotionLogger::start(uint64_t unixMs) {
   if (!file_) { error_ = "file_open_failed"; return false; }
   startedMs_ = millis();
   uint8_t header[motion::kHeaderBytes];
-  motion::makeHeader(header, startedMs_, unixMs);
+  motion::makeHeader(header, startedMs_, unixMs, trigger);
   if (fwrite(header, 1, sizeof(header), file_) != sizeof(header) || !syncFile(file_)) {
     fclose(file_);
     file_ = nullptr;

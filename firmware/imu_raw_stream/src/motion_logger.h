@@ -14,7 +14,7 @@ class MotionLogger {
   friend class CloudSync;
  public:
   bool begin();
-  bool start(uint64_t unixMs = 0);
+  bool start(uint64_t unixMs = 0, uint8_t trigger = 0);
   bool stop(const char* reason = "complete");
   void sample(motion::Sample value, uint32_t uptime);
   void tick(uint32_t now);

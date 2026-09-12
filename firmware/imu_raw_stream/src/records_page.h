@@ -48,7 +48,7 @@ const $ = id => document.getElementById(id);
 const states = {complete:'正常结束',interrupted:'未正常结束（断电或重启）',storage_full:'存储空间不足，已停止',io_error:'写入异常',sensor_error:'传感器读取异常',recording:'正在记录'};
 const errors = {storage_unavailable:'存储不可用',storage_unavailable_no_autoformat:'存储无法挂载，已有数据未被清除',storage_full:'空间不足，请先下载并清理历史',stop_recording_first:'请先停止记录',imu_unavailable:'传感器未就绪',write_failed:'写入失败',finalize_failed:'结束标记失败，记录仍保留',corrupt_record_download_binary_for_recovery:'检测到数据损坏，请下载原始文件恢复',invalid_header_download_binary_for_recovery:'记录头损坏，请下载原始文件检查'};
 const minutes = ms => (ms / 60000).toFixed(1) + ' 分钟';
-const cloudModes = {starting:'正在启动',away_pending:'未连上家里 Wi-Fi，约 10 秒后自动开始记录',recording:'离家中，设备正在自动记录',held:'已手动停止；回家后恢复自动记录',home_recording:'在家手动记录中，停止后上传',waiting_clock:'已回家，等待网络校时后上传',syncing:'已回家，正在上传到网站',home:'在家 · 记录已同步',error:'同步暂时失败，稍后自动重试'};
+const cloudModes = {starting:'正在启动',away_pending:'未连上家里 Wi-Fi，约 10 秒后自动开始记录',recording:'正在自动记录',held:'已手动停止；回家后恢复自动记录',home_recording:'在家手动记录中，停止后上传',waiting_clock:'已回家，等待网络校时后上传',syncing:'已回家，正在上传到网站',home:'在家 · 记录已同步',error:'同步暂时失败，稍后自动重试'};
 let cloudOn = false;
 function message(text=''){ $('message').textContent = text; }
 function controls(){
@@ -93,7 +93,7 @@ async function cloud(){
     const c = await (await request('/api/cloud')).json();
     cloudOn = !!c.configured; $('cloud-panel').hidden = !cloudOn;
     if(!cloudOn) return;
-    $('intro').textContent = '已开启回家同步：离开家里 Wi-Fi 约 10 秒后自动开始记录；回家连上 15 秒后自动结束并上传到网站。上传经网站校验后，空间不足时才从设备上删除最旧的已上传记录。';
+    $('intro').textContent = '已开启自动记录：离开家里 Wi-Fi 约 10 秒后开始；在家范围内持续活动约 30 秒也会开始，静止 5 分钟后自动结束。回家连上 Wi-Fi 15 秒后自动结束并上传到网站。上传经网站校验后，空间不足时才从设备上删除最旧的已上传记录。';
     $('cloud-state').textContent = cloudModes[c.mode] || c.mode;
     $('cloud-detail').textContent = '待上传 ' + c.pending + ' 段 · 设备上已上传 ' + c.synced + ' 段' + (c.rejected ? ' · 网站拒收 ' + c.rejected + ' 段' : '') + (c.pruned_this_boot ? ' · 本次开机清理 ' + c.pruned_this_boot + ' 段' : '') + (c.mode === 'syncing' && c.bytes ? ' · 当前 ' + Math.round(100 * c.offset / c.bytes) + '%' : '') + (c.error ? ' · ' + c.error : '') + (c.last_sync_unix_ms ? ' · 最近上传 ' + new Date(c.last_sync_unix_ms).toLocaleString() : '');
     $('cloud-site').textContent = c.site; $('cloud-site').href = c.site;

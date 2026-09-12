@@ -16,7 +16,8 @@ class CloudSync {
   explicit CloudSync(MotionLogger& logger) : logger_(logger) {}
   void begin();
   // connected: station link to the saved home Wi-Fi is up.
-  void tick(bool connected, bool imuReady, float voltage);
+  // active: the recorder's movement flag for the current sample.
+  void tick(bool connected, bool imuReady, bool active, float voltage);
   bool configure(const String& line);
   bool enabled() const { return enabled_; }
   String statusJson() const;
@@ -33,7 +34,10 @@ class CloudSync {
     bool ack = false, retry = false, reject = false;
   };
   void away(uint32_t now, bool imuReady);
-  void home(uint32_t now, float voltage);
+  void home(uint32_t now, bool imuReady, float voltage);
+  void trackMotion(uint32_t now, bool active);
+  bool sustainedMotion(uint32_t now) const;
+  bool stillFor(uint32_t now, uint32_t span) const;
   void upload(uint32_t now);
   bool heartbeat(uint32_t now, float voltage);
   Result request(const char* action, const String& query, const uint8_t* bytes = nullptr,
@@ -63,9 +67,11 @@ class CloudSync {
   size_t size_ = 0, offset_ = 0;
   bool enabled_ = false, atHome_ = false, knownOffset_ = false;
   bool wasRecording_ = false, holdUntilHome_ = false, rejectsCleared_ = false;
+  bool startedByMotion_ = false;
   bool socketOpen_ = false;
   uint32_t awaySince_ = 0, homeSince_ = 0, startRetryAt_ = 0, retryAt_ = 0;
   uint32_t lastHeartbeat_ = 0, lastScan_ = 0, lastPruneCheck_ = 0;
+  uint32_t activeSince_ = 0, lastActiveMs_ = 0, motionSuppressUntil_ = 0;
   uint32_t pending_ = 0, synced_ = 0, rejected_ = 0, uploaded_ = 0, pruned_ = 0;
   uint64_t lastSyncUnixMs_ = 0;
 };

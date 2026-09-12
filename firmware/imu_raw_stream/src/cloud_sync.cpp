@@ -20,6 +20,13 @@ constexpr uint32_t kAuthRetryMs = 300000;
 constexpr uint32_t kScanMs = 60000;
 constexpr uint32_t kHeartbeatMs = 60000;
 constexpr uint32_t kPruneCheckMs = 30000;
+// Worn only for outings: movement itself starts a session, because a walk can
+// stay inside home Wi-Fi. Sustained means active with no pause longer than the
+// gap below; the session then ends after this much stillness at home.
+constexpr uint32_t kMotionStartMs = 30000;
+constexpr uint32_t kMotionGapMs = 3000;
+constexpr uint32_t kStillStopMs = 300000;
+constexpr uint32_t kMotionHoldMs = 120000;  // after a session ends at home
 constexpr size_t kChunkBytes = 16384;
 // About one hour at 20 Hz (1.73 MB) after the recorder's 128 KiB reserve and
 // its 15% filesystem allowance. Only cloud-confirmed sessions are removed.
@@ -153,12 +160,27 @@ String CloudSync::statusJson() const {
   return s;
 }
 
-void CloudSync::tick(bool connected, bool imuReady, float voltage) {
+void CloudSync::tick(bool connected, bool imuReady, bool active, float voltage) {
   if (!enabled_ || !logger_.ready()) return;
   const uint32_t now = millis();
-  if (connected) home(now, voltage);
+  trackMotion(now, active);
+  if (connected) home(now, imuReady, voltage);
   else away(now, imuReady);
   wasRecording_ = logger_.recording();
+}
+
+void CloudSync::trackMotion(uint32_t now, bool active) {
+  if (!active) return;
+  if (!activeSince_ || now - lastActiveMs_ > kMotionGapMs) activeSince_ = now ? now : 1;
+  lastActiveMs_ = now ? now : 1;
+}
+
+bool CloudSync::sustainedMotion(uint32_t now) const {
+  return activeSince_ && now - lastActiveMs_ <= kMotionGapMs && now - activeSince_ >= kMotionStartMs;
+}
+
+bool CloudSync::stillFor(uint32_t now, uint32_t span) const {
+  return !lastActiveMs_ || now - lastActiveMs_ >= span;
 }
 
 void CloudSync::away(uint32_t now, bool imuReady) {
@@ -193,10 +215,11 @@ void CloudSync::away(uint32_t now, bool imuReady) {
   }
   if (!due(now, startRetryAt_)) return;
   prune(kPruneTargetBytes);
-  if (logger_.start(unixMs())) {
+  if (logger_.start(unixMs(), 'w')) {
     mode_ = "recording";
     error_ = "";
     startRetryAt_ = 0;
+    startedByMotion_ = false;
     lastPruneCheck_ = now;
   } else {
     mode_ = "error";
@@ -205,7 +228,7 @@ void CloudSync::away(uint32_t now, bool imuReady) {
   }
 }
 
-void CloudSync::home(uint32_t now, float voltage) {
+void CloudSync::home(uint32_t now, bool imuReady, float voltage) {
   awaySince_ = 0;
   if (!homeSince_) homeSince_ = now ? now : 1;
   if (now - homeSince_ < kHomeStableMs) return;
@@ -215,10 +238,38 @@ void CloudSync::home(uint32_t now, float voltage) {
     lastScan_ = 0;
     retryAt_ = 0;
     if (logger_.recording() && !logger_.stop()) error_ = "record_finalize_failed";
+    startedByMotion_ = false;
   }
-  // A session started by hand at home stays under manual control; never upload while sampling.
   if (logger_.recording()) {
-    mode_ = "home_recording";
+    // A session that movement started ends once the board has been still for a
+    // while, because an outing can stay inside home Wi-Fi the whole time. A
+    // session the user started by hand stays under their control.
+    mode_ = startedByMotion_ ? "recording" : "home_recording";
+    if (startedByMotion_ && stillFor(now, kStillStopMs)) {
+      if (!logger_.stop()) error_ = "record_finalize_failed";
+      startedByMotion_ = false;
+      Serial.println("STATUS,motion_session_ended_still");
+    }
+    return;
+  }
+  if (wasRecording_) {  // any session that just ended here: do not restart at once
+    motionSuppressUntil_ = after(now, kMotionHoldMs);
+    activeSince_ = 0;
+  }
+  // Worn and moving while still in range: record the outing anyway.
+  if (imuReady && due(now, motionSuppressUntil_) && sustainedMotion(now)) {
+    prune(kPruneTargetBytes);
+    if (logger_.start(unixMs(), 'm')) {
+      startedByMotion_ = true;
+      mode_ = "recording";
+      error_ = "";
+      lastPruneCheck_ = now;
+      Serial.println("STATUS,motion_session_started");
+      return;
+    }
+    mode_ = "error";
+    error_ = "record_start_failed_" + logger_.error_;
+    motionSuppressUntil_ = after(now, kStartRetryMs);
     return;
   }
   if (!unixMs()) {

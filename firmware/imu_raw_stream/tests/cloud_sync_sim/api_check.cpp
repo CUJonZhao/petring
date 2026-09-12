@@ -4,7 +4,7 @@
 
 void api_check(CloudSync& sync, const String& provisioning) {
   sync.begin();
-  sync.tick(true, true, 4.0f);
+  sync.tick(true, true, false, 4.0f);
   (void)sync.configure(provisioning);
   (void)sync.enabled();
   (void)sync.statusJson();
@@ -14,7 +14,7 @@ void api_check(CloudSync& sync, const String& provisioning) {
 
 void logger_api_check(MotionLogger& logger, WebServer& server) {
   (void)logger.begin();
-  (void)logger.start(0);
+  (void)logger.start(0, 'u');
   (void)logger.stop();
   (void)logger.recording();
   (void)logger.ready();

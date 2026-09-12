@@ -38,7 +38,8 @@ inline uint16_t crc16(const uint8_t* p, size_t size) {
   return crc;
 }
 
-inline void makeHeader(uint8_t* p, uint32_t uptime, uint64_t unixMs) {
+// trigger: 0 unknown, 'w' left home Wi-Fi, 'm' sustained motion, 'u' user.
+inline void makeHeader(uint8_t* p, uint32_t uptime, uint64_t unixMs, uint8_t trigger = 0) {
   memset(p, 0, kHeaderBytes);
   memcpy(p, "DLOG", 4);
   put16(p + 4, 1);
@@ -47,7 +48,8 @@ inline void makeHeader(uint8_t* p, uint32_t uptime, uint64_t unixMs) {
   put32(p + 12, uptime);
   put32(p + 16, uint32_t(unixMs));
   put32(p + 20, uint32_t(unixMs >> 32));
-  // Bytes 24..29 reserved; version 1 fixes the LSM6DSOX scales above.
+  p[24] = trigger;
+  // Bytes 25..29 reserved; version 1 fixes the LSM6DSOX scales above.
   put16(p + 30, crc16(p, 30));
 }
 inline bool validHeader(const uint8_t* p) {

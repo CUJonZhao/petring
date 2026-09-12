@@ -17,7 +17,7 @@ await page.locator('.session').first().waitFor();
 assert.match(await page.locator('#cloud-state').innerText(),/正在上传/);
 assert.match(await page.locator('#cloud-detail').innerText(),/待上传 1 段/);
 assert.match(await page.locator('#cloud-detail').innerText(),/50%/);
-assert.match(await page.locator('#intro').innerText(),/回家同步/);
+assert.match(await page.locator('#intro').innerText(),/自动记录/);
 assert.match(await page.locator('.session').nth(0).innerText(),/已上传网站/);
 assert.match(await page.locator('.session').nth(1).innerText(),/待回家上传/);
 assert.equal(await page.locator('#cloud-site').getAttribute('href'),'https://example.test');
