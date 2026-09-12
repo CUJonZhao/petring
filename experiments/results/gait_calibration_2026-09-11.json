@@ -15,7 +15,7 @@
     },
     "note": "raw file stays in the ignored data/raw tree; the site holds the same session"
   },
-  "protocol": "board carried by hand indoors: trigger walk, 2 min still, ~1.5 min normal walk, ~1 min fast walk, then still until the 5 min rule ended the session",
+  "protocol": "board held in front of the chest with both hands, no arm swing, indoors: trigger walk, 2 min still, ~1.5 min normal walk, ~1 min fast walk (in that order), then still until the 5 min rule ended the session",
   "labels_s": [
     [
       12,
@@ -79,8 +79,9 @@
   },
   "findings": [
     "rest and walk separate by a factor of about 25 (rest p90 4.2 mg, walk p10 102.9 mg), so the boundary is not sensitive: 149 of 149 labelled windows agreed",
-    "the dominant frequency is not a reliable cadence when the board is hand-carried: the normal-walk phase read 3.0-4.0 Hz (a harmonic) while the faster phase read 1.85 Hz, so classification uses amplitude only and the frequency is reported as a diagnostic",
-    "a single 610 mg window when the board was set down was classified as run; lone first/last windows now follow their neighbour"
+    "the dominant frequency reflects how the board is carried, not the gait: the fast phase read 1.88 Hz by FFT and 2.00 Hz by autocorrelation, which is a 120 steps/min cadence, while the slower normal-walk phase read 3.38/2.86 Hz - too fast to be a cadence. Held in front of the chest the arms act as a spring and their 2-5 Hz sway dominates while the torso bounce is small; it only takes over once the walk is brisk enough. Both estimators agree, so this is the mounting, not the algorithm. Classification therefore uses amplitude, whose ordering was correct (fast walk > normal walk > rest)",
+    "a single 610 mg window when the board was set down was classified as run; lone first/last windows now follow their neighbour",
+    "a harness-mounted box is rigidly coupled to the trunk, so the fundamental should be the dog's step frequency; check this on the first worn recording before trusting frequency for the walk/run split"
   ],
   "summary_with_calibrated_thresholds": {
     "rest": 180.0,
