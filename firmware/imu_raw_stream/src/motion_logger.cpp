@@ -47,10 +47,30 @@ bool MotionLogger::begin() {
   return ready_;
 }
 
+// Exact, but it walks every allocated block: on a half-full partition this took
+// about 0.3 s, once per flush, which is what opened the sampling gaps. Callers on
+// the sampling path use freeBytesCached() instead.
 size_t MotionLogger::freeBytes() {
   if (!ready_) return 0;
   const size_t total = fs_.totalBytes(), used = fs_.usedBytes();
   return total > used ? total - used : 0;
+}
+
+void MotionLogger::refreshFree() {
+  freeEstimate_ = freeBytes();
+  freeCheckedMs_ = millis();
+  if (!freeCheckedMs_) freeCheckedMs_ = 1;
+}
+
+size_t MotionLogger::freeBytesCached() {
+  if (!ready_) return 0;
+  // Refresh rarely when there is room, often when the reserve is close. Between
+  // refreshes the estimate only shrinks, and a real write failure still stops
+  // recording, so the estimate is never trusted to allow an impossible write.
+  const uint32_t interval = freeEstimate_ > 512 * 1024 ? 30000 : 5000;
+  const uint32_t now = millis();
+  if (!freeCheckedMs_ || now - freeCheckedMs_ >= interval) refreshFree();
+  return freeEstimate_;
 }
 
 bool MotionLogger::validId(const String& id) {
@@ -78,7 +98,8 @@ const char* MotionLogger::stateFor(const String& path) {
 bool MotionLogger::start(uint64_t unixMs) {
   if (recording_) return true;
   if (!ready_) return false;
-  if (freeBytes() < motion::kReserveBytes + 4096) {
+  refreshFree();
+  if (freeEstimate_ < motion::kReserveBytes + 4096) {
     error_ = "storage_full";
     return false;
   }
@@ -115,14 +136,17 @@ bool MotionLogger::start(uint64_t unixMs) {
 
 bool MotionLogger::flush() {
   return buffer_.flush([this](const uint8_t* bytes, size_t size) {
-    if (freeBytes() < motion::kReserveBytes + size + 4096) {
+    if (freeBytesCached() < motion::kReserveBytes + size + 4096) {
       error_ = "storage_full";
       return false;
     }
     if (fwrite(bytes, 1, size, file_) != size || !syncFile(file_)) {
-      error_ = "write_failed";
+      // The estimate may have been optimistic; confirm before reporting a cause.
+      refreshFree();
+      error_ = freeEstimate_ < motion::kReserveBytes + size ? "storage_full" : "write_failed";
       return false;
     }
+    freeEstimate_ -= freeEstimate_ > size ? size : freeEstimate_;
     saved_ += size / motion::kRecordBytes;
     lastFlushMs_ = millis();
     return true;
@@ -174,7 +198,8 @@ void MotionLogger::readFailure() {
 }
 
 String MotionLogger::statusJson() {
-  const size_t free = freeBytes();
+  // Polled every two seconds by the phone page; never walk the filesystem here.
+  const size_t free = freeBytesCached();
   // Conservative estimate with 15% filesystem allowance, not measured runtime.
   const uint32_t seconds = free > motion::kReserveBytes ?
       ((free - motion::kReserveBytes) * 85 / 100) / (motion::kRecordBytes * 20) : 0;

@@ -22,7 +22,7 @@ PIO="$(command -v pio || command -v platformio || true)"
 [ -z "$PIO" ] && [ -x "$HOME/.platformio/penv/bin/pio" ] && PIO="$HOME/.platformio/penv/bin/pio"
 [ -z "$PIO" ] && [ -x /tmp/petring-firmware-env/bin/pio ] && PIO=/tmp/petring-firmware-env/bin/pio
 pick_python() {
-  for py in python3 "$HOME/.platformio/penv/bin/python"; do
+  for py in python3 /tmp/petring-firmware-env/bin/python "$HOME/.platformio/penv/bin/python"; do
     if command -v "$py" >/dev/null 2>&1 && "$py" -c 'import serial, requests' >/dev/null 2>&1; then
       echo "$py"; return 0
     fi

@@ -20,6 +20,8 @@ class MotionLogger {
   void tick(uint32_t now);
   void readFailure();
   bool recording() const { return recording_; }
+  // Free space without walking the filesystem on every call (see freeBytes()).
+  size_t freeBytesCached();
   bool ready() const { return ready_; }
   String statusJson();
   void list(WebServer& server);
@@ -27,6 +29,7 @@ class MotionLogger {
   void remove(WebServer& server);
  private:
   size_t freeBytes();
+  void refreshFree();
   bool flush();
   bool validId(const String& id);
   String pathFor(const String& id);
@@ -39,6 +42,8 @@ class MotionLogger {
   String id_;
   String error_;
   String lastStop_ = "idle";
+  size_t freeEstimate_ = 0;
+  uint32_t freeCheckedMs_ = 0;
   uint32_t startedMs_ = 0;
   uint32_t lastFlushMs_ = 0;
   uint32_t saved_ = 0;

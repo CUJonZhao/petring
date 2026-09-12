@@ -51,6 +51,8 @@ void removeIfPresent(fs::FS& fs, const String& path) {
 }  // namespace
 
 void CloudSync::begin() {
+  client_.setCACert(kCloudRootCA);
+  client_.setHandshakeTimeout(12);
   Preferences p;
   if (p.begin("delta-cloud", true)) {
     url_ = p.getString("url", "");
@@ -94,6 +96,7 @@ bool CloudSync::configure(const String& line) {
                   p.putString("token", token) > 0;
   p.end();
   if (!ok) return false;
+  closeConnection();
   url_ = url;
   bypass_ = bypass;
   token_ = token;
@@ -152,6 +155,7 @@ void CloudSync::tick(bool connected, bool imuReady, float voltage) {
 void CloudSync::away(uint32_t now, bool imuReady) {
   homeSince_ = 0;
   atHome_ = false;
+  closeConnection();  // away from home the socket is dead anyway; free the TLS memory
   if (path_.length()) clearTransfer();  // the site keeps received chunks; resume at home
   if (!awaySince_) awaySince_ = now ? now : 1;
   const bool recording = logger_.recording();
@@ -161,7 +165,7 @@ void CloudSync::away(uint32_t now, bool imuReady) {
     mode_ = "recording";
     if (now - lastPruneCheck_ >= kPruneCheckMs) {
       lastPruneCheck_ = now;
-      if (logger_.freeBytes() < kPruneLowWaterBytes) prune(kPruneTopUpBytes);
+      if (logger_.freeBytesCached() < kPruneLowWaterBytes) prune(kPruneTopUpBytes);
     }
     return;
   }
@@ -223,6 +227,7 @@ void CloudSync::home(uint32_t now, float voltage) {
     if (!selectFile()) {
       clearMarkers(".retry");  // sessions that failed get another turn on the next scan
       lastScan_ = now;
+      closeConnection();  // nothing to send; do not hold TLS memory while idle
       prune(kPruneTargetBytes);
       if (error_.isEmpty()) mode_ = "home";
       return;
@@ -328,24 +333,22 @@ void CloudSync::fail(Result result, uint32_t now) {
   } else if (result == Result::retry) {
     markFile(".retry");  // let other sessions go first
   }
+  closeConnection();
   clearTransfer();
   mode_ = "error";
   retryAt_ = after(now, result == Result::auth ? kAuthRetryMs : kRetryMs);
 }
 
-CloudSync::Result CloudSync::request(const char* action, const String& query,
-                                     const uint8_t* bytes, size_t size, bool post) {
-  WiFiClientSecure client;
-  client.setCACert(kCloudRootCA);
-  client.setHandshakeTimeout(12);
+int CloudSync::send(const char* action, const String& query, const uint8_t* bytes, size_t size,
+                    bool post, String& location) {
   HTTPClient http;
+  // Keep the TLS session for the next chunk: the handshake dominated upload time.
+  http.setReuse(true);
   http.setConnectTimeout(8000);
   http.setTimeout(15000);
   http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-  if (!http.begin(client, url_ + "/api/device/" + action + query)) {
-    error_ = "https_begin_failed";
-    return Result::retry;
-  }
+  if (!http.begin(client_, url_ + "/api/device/" + action + query)) return 0;
+  socketOpen_ = true;  // even a failed attempt leaves a socket worth closing
   http.addHeader("OAI-Sites-Authorization", "Bearer " + bypass_);
   http.addHeader("Authorization", "Bearer " + token_);
   http.addHeader("Content-Type",
@@ -357,11 +360,37 @@ CloudSync::Result CloudSync::request(const char* action, const String& query,
   http.collectHeaders(collect, 1);
   const int code = post ? http.POST(const_cast<uint8_t*>(bytes), size) : http.GET();
   body_ = code > 0 ? http.getString() : "";
-  const String location = code >= 300 && code < 400 ? http.header("Location") : String();
-  http.end();
+  location = code >= 300 && code < 400 ? http.header("Location") : String();
+  http.end();  // leaves the socket open for reuse when the site allows it
+  return code;
+}
+
+void CloudSync::closeConnection() {
+  if (!socketOpen_) return;
+  client_.stop();
+  socketOpen_ = false;
+}
+
+CloudSync::Result CloudSync::request(const char* action, const String& query,
+                                     const uint8_t* bytes, size_t size, bool post) {
+  String location;
+  int code = 0;
+  for (int attempt = 0; attempt < 2; ++attempt) {
+    const bool reused = client_.connected();
+    code = send(action, query, bytes, size, post, location);
+    if (code > 0) break;
+    // A kept-open socket may have been closed by the site while idle: drop it and
+    // try once more with a fresh handshake before reporting a failure.
+    closeConnection();
+    if (!reused) break;
+  }
   if (code == 200) {
     error_ = "";
     return Result::ok;
+  }
+  if (!code) {
+    error_ = "https_begin_failed";
+    return Result::retry;
   }
   error_ = "http_" + String(code);
   Serial.printf("STATUS,cloud_http,action=%s,code=%d,body=%.96s\n", action, code, body_.c_str());

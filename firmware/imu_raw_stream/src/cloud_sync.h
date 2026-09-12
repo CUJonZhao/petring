@@ -1,5 +1,8 @@
 #pragma once
+#include <WiFiClientSecure.h>
+
 #include <vector>
+
 #include "motion_logger.h"
 
 // Home Wi-Fi sync. While the saved home network is out of reach the board
@@ -32,6 +35,9 @@ class CloudSync {
   bool heartbeat(uint32_t now, float voltage);
   Result request(const char* action, const String& query, const uint8_t* bytes = nullptr,
                  size_t size = 0, bool post = false);
+  int send(const char* action, const String& query, const uint8_t* bytes, size_t size,
+           bool post, String& location);
+  void closeConnection();
   bool confirmed() const;
   std::vector<Entry> scan();
   bool selectFile();
@@ -44,12 +50,14 @@ class CloudSync {
   void fail(Result result, uint32_t now);
 
   MotionLogger& logger_;
+  WiFiClientSecure client_;  // kept open between chunks; one TLS handshake per burst
   String url_, bypass_, token_, body_;
   String path_, id_, sha_, query_, state_;
   String mode_ = "unconfigured", error_;
   size_t size_ = 0, offset_ = 0;
   bool enabled_ = false, atHome_ = false, knownOffset_ = false;
   bool wasRecording_ = false, holdUntilHome_ = false, rejectsCleared_ = false;
+  bool socketOpen_ = false;
   uint32_t awaySince_ = 0, homeSince_ = 0, startRetryAt_ = 0, retryAt_ = 0;
   uint32_t lastHeartbeat_ = 0, lastScan_ = 0, lastPruneCheck_ = 0;
   uint32_t pending_ = 0, synced_ = 0, rejected_ = 0, uploaded_ = 0, pruned_ = 0;
