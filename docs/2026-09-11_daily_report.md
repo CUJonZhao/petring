@@ -92,6 +92,13 @@ flowchart LR
 2. **上传速度**：改为复用同一个 TLS 连接。**复测显示握手确实省掉了，但每个请求仍约 4.2 秒，且与请求体大小无关**（0 字节的 complete 请求也要 4.6 秒）。随后从同一家庭网络的 Mac 测同一接口：新建连接 1,009 ms、复用连接 879 ms，说明**约 3.3 秒耗在板子这侧**。
 3. **上传速度（已解决）**：先怀疑射频省电，实测无效并撤销；加上「每请求耗时 + 是否复用 + 网站的 Connection 回答」日志后，看到 `reused=0` 而网站回的是 `keep-alive`，于是查这版 Arduino 核心的 `HTTPClient` 源码：`end()` 保留 socket 却不清空内部 client 指针，紧接着对象析构无条件 `stop()`，把刚保留的连接关掉了。改成常驻成员后实测**新建连接约 4.0 秒、复用连接 1.01 秒**，与 Mac 的 0.9 秒持平。一小时记录的上传时间由此从约 7.8 分钟降到约 1.9 分钟。
 
+![采样与上传的改动前后对比](figures/tuning_2026-09-11.png)
+
+左：去掉每次落盘的文件系统遍历后，采样从 15.22 Hz 回到 19.4–19.5 Hz，未覆盖时间从 28.5% 降到 2.5–3.7%。
+右：每个上传请求阻塞主循环的时间，从 4,830 ms 降到 1,022 ms，已经接近 Mac 在同一接口上的 879 ms——也就是说板子这侧的额外开销基本消除，剩下的是网站本身的响应时间。「复用连接失效」那一条是中途的错误尝试：`HTTPClient` 析构时关掉了刚保留的 socket。
+
+两张图都可以用 `python3 experiments/plot_2026-09-11.py` 从已提交的汇总数据重新生成，原始记录不需要在场。
+
 ## 网站侧核对
 
 登录网站后逐项确认：共 **17 段、2.50 MB**，包含设备本地已经清理掉的旧记录，说明网站确实是完整历史而设备只留近期。列表接口 409 ms，设备心跳在线。
@@ -132,6 +139,10 @@ flowchart LR
 | 电池 | 3.878 → 3.882 V（电池供电，6 分钟内无可测下降） |
 
 **用户全程只是走动和把板子放下，没有按任何按钮。** 这是目标闭环第一次在无人干预下完整跑通，只差「戴在狗身上」和「网站端分析上线」。
+
+![室内标定记录：底色为自动判定状态，下方为两类的 MAD 分布](figures/gait_calibration_2026-09-11.png)
+
+上图来自真实记录 `ce940dee`。底色是设备算法判定的状态，上方括号是人工标注的动作段；下半部分是两类的 MAD 分布（对数轴），虚线是最终采用的 50 mg 阈值。
 
 ### 走／静止阈值标定
 
@@ -177,6 +188,40 @@ flowchart LR
 4. 采样已恢复到 19.5 Hz，剩余约 3% 未覆盖时间来自落盘本身，暂不处理。
 5. 可选：运动触发会丢掉开头约 30 秒，如需补上可用板上 2 MiB PSRAM 做预缓冲；网站导出的 CSV 用完整浮点精度，比设备端大约 50%。
 6. 后台还有一个 9 月 11 日 17:47 启动的本地开发服务器在跑，部署完可在该窗口 Ctrl-C 关掉。
+
+## 明天开工速查
+
+| 项 | 现状 |
+|---|---|
+| 板子固件 | 与仓库当前固件源码一致（最后一次刷写 2026-09-11 23:00，含运动触发、静止结束、采样修复、连接复用） |
+| 网站 | 线上是旧版，**分析面板与标定阈值尚未部署**；代码在本机 `site/`（独立仓库，2 个本地提交，无远端） |
+| 父仓库 | 本地领先 origin 若干提交，用 `git push` 推送 |
+| 网址 | https://delta-walk-jz-20260911.yesmora.chatgpt.site （旧的 `fit-siren-4693` 主机会跳转，设备配置里已改） |
+| 设备凭据／整片备份 | `data/raw/cloud_sync_20260911/secrets.config.json`、`before_flash.bin`（被 .gitignore 排除，勿提交） |
+| 今晚的标定记录 | `data/raw/cloud_sync_20260911/indoor_labeled/`（原始 bin、窗口 CSV、标签），汇总已提交到 `experiments/results/` |
+| 阈值住在两个地方 | `experiments/gait_analysis.py` 的 `DEFAULT_THRESHOLDS` 与 `site/lib/gait.ts` 的 `THRESHOLDS`，**改一处必须同步另一处**，改完跑一次对拍 |
+
+常用命令（都在仓库根目录）：
+
+```sh
+bash experiments/cloud_sync_mac.sh flash       # 编译并刷写（保留数据分区）
+bash experiments/cloud_sync_mac.sh cloudtest   # 1 分钟：三次只读请求的耗时
+bash experiments/cloud_sync_mac.sh validate    # 完整实机验证（关 Wi-Fi 模拟外出）
+bash experiments/cloud_sync_mac.sh sitecheck   # 网站类型检查与构建（自己找 node）
+sh firmware/imu_raw_stream/tests/cloud_sync_sim/run.sh   # 主机模拟与公开接口检查
+python3 experiments/gait_analysis.py <记录>.bin --plot out.png --windows-csv out.csv
+python3 experiments/gait_analysis.py <记录>.bin --labels labels.csv --suggest
+python3 experiments/analyze_cloud_sync_run.py <运行目录>
+python3 experiments/plot_2026-09-11.py         # 重新生成本报告的图
+```
+
+环境上的坑（都遇到过）：
+
+- `npx`／`node` 不在登录 shell 的 PATH 里，`sitecheck` 会去常见安装位置找；找不到就在 Codex 里构建部署。
+- PlatformIO 装在 `/tmp/petring-firmware-env/bin/pio`，重启后可能消失，脚本里有回退逻辑。
+- 串口是 `/dev/cu.usbserial-59680111041`；板子不插 USB 时 `probe` 会报 `No such file or directory`，属正常。
+- 网站只能在 Codex／ChatGPT Sites 中部署，Claude 会话既连不上也部署不了。
+- 打开串口会让板子复位，复位后发的命令会丢，脚本里已等待启动完成。
 
 ## 今天归档的文件
 

@@ -88,5 +88,1040 @@
     "walk": 162.0,
     "run": 0.0
   },
-  "activity_index_mad_mg": 80.0
+  "activity_index_mad_mg": 80.0,
+  "windows": [
+    {
+      "t": 0.01,
+      "mad": 609.7,
+      "stride": 2.38,
+      "state": "walk"
+    },
+    {
+      "t": 2.01,
+      "mad": 571.4,
+      "stride": 1.75,
+      "state": "walk"
+    },
+    {
+      "t": 4.01,
+      "mad": 532.5,
+      "stride": 1.69,
+      "state": "walk"
+    },
+    {
+      "t": 6.01,
+      "mad": 413.9,
+      "stride": 1.62,
+      "state": "walk"
+    },
+    {
+      "t": 8.01,
+      "mad": 184.0,
+      "stride": 1.5,
+      "state": "walk"
+    },
+    {
+      "t": 10.01,
+      "mad": 28.7,
+      "stride": 2.12,
+      "state": "rest"
+    },
+    {
+      "t": 12.01,
+      "mad": 4.6,
+      "stride": 2.69,
+      "state": "rest"
+    },
+    {
+      "t": 14.01,
+      "mad": 1.4,
+      "stride": 4.88,
+      "state": "rest"
+    },
+    {
+      "t": 16.01,
+      "mad": 1.1,
+      "stride": 3.31,
+      "state": "rest"
+    },
+    {
+      "t": 18.01,
+      "mad": 1.1,
+      "stride": 3.06,
+      "state": "rest"
+    },
+    {
+      "t": 20.01,
+      "mad": 1.1,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 22.01,
+      "mad": 1.1,
+      "stride": 2.34,
+      "state": "rest"
+    },
+    {
+      "t": 24.01,
+      "mad": 1.3,
+      "stride": 2.89,
+      "state": "rest"
+    },
+    {
+      "t": 26.01,
+      "mad": 1.3,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 28.01,
+      "mad": 1.2,
+      "stride": 2.88,
+      "state": "rest"
+    },
+    {
+      "t": 30.01,
+      "mad": 1.2,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 32.01,
+      "mad": 1.1,
+      "stride": 3.44,
+      "state": "rest"
+    },
+    {
+      "t": 34.01,
+      "mad": 1.1,
+      "stride": 3.19,
+      "state": "rest"
+    },
+    {
+      "t": 36.01,
+      "mad": 1.1,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 38.01,
+      "mad": 1.0,
+      "stride": 3.06,
+      "state": "rest"
+    },
+    {
+      "t": 40.01,
+      "mad": 0.9,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 42.01,
+      "mad": 0.9,
+      "stride": 2.94,
+      "state": "rest"
+    },
+    {
+      "t": 44.01,
+      "mad": 0.9,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 46.01,
+      "mad": 0.8,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 48.01,
+      "mad": 1.0,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 50.01,
+      "mad": 1.3,
+      "stride": 3.25,
+      "state": "rest"
+    },
+    {
+      "t": 52.01,
+      "mad": 1.2,
+      "stride": 2.89,
+      "state": "rest"
+    },
+    {
+      "t": 54.01,
+      "mad": 1.2,
+      "stride": 2.92,
+      "state": "rest"
+    },
+    {
+      "t": 56.01,
+      "mad": 1.2,
+      "stride": 3.19,
+      "state": "rest"
+    },
+    {
+      "t": 58.01,
+      "mad": 0.9,
+      "stride": 2.38,
+      "state": "rest"
+    },
+    {
+      "t": 60.01,
+      "mad": 1.0,
+      "stride": 2.88,
+      "state": "rest"
+    },
+    {
+      "t": 62.01,
+      "mad": 1.0,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 64.01,
+      "mad": 1.1,
+      "stride": 3.06,
+      "state": "rest"
+    },
+    {
+      "t": 66.01,
+      "mad": 1.1,
+      "stride": 3.38,
+      "state": "rest"
+    },
+    {
+      "t": 68.01,
+      "mad": 1.1,
+      "stride": 3.25,
+      "state": "rest"
+    },
+    {
+      "t": 70.01,
+      "mad": 0.9,
+      "stride": 2.94,
+      "state": "rest"
+    },
+    {
+      "t": 72.01,
+      "mad": 0.9,
+      "stride": 3.12,
+      "state": "rest"
+    },
+    {
+      "t": 74.01,
+      "mad": 1.1,
+      "stride": 3.19,
+      "state": "rest"
+    },
+    {
+      "t": 76.01,
+      "mad": 1.1,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 78.01,
+      "mad": 1.0,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 80.01,
+      "mad": 1.1,
+      "stride": 2.75,
+      "state": "rest"
+    },
+    {
+      "t": 82.01,
+      "mad": 1.3,
+      "stride": 3.09,
+      "state": "rest"
+    },
+    {
+      "t": 84.01,
+      "mad": 1.2,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 86.01,
+      "mad": 1.2,
+      "stride": 2.88,
+      "state": "rest"
+    },
+    {
+      "t": 88.01,
+      "mad": 1.0,
+      "stride": 3.06,
+      "state": "rest"
+    },
+    {
+      "t": 90.01,
+      "mad": 1.0,
+      "stride": 3.06,
+      "state": "rest"
+    },
+    {
+      "t": 92.01,
+      "mad": 1.2,
+      "stride": 3.19,
+      "state": "rest"
+    },
+    {
+      "t": 94.01,
+      "mad": 2.3,
+      "stride": 2.62,
+      "state": "rest"
+    },
+    {
+      "t": 96.01,
+      "mad": 2.7,
+      "stride": 2.56,
+      "state": "rest"
+    },
+    {
+      "t": 98.01,
+      "mad": 2.8,
+      "stride": 3.12,
+      "state": "rest"
+    },
+    {
+      "t": 100.01,
+      "mad": 2.4,
+      "stride": 0.81,
+      "state": "rest"
+    },
+    {
+      "t": 102.01,
+      "mad": 0.9,
+      "stride": 3.25,
+      "state": "rest"
+    },
+    {
+      "t": 104.01,
+      "mad": 0.9,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 106.01,
+      "mad": 0.9,
+      "stride": 3.12,
+      "state": "rest"
+    },
+    {
+      "t": 108.01,
+      "mad": 0.9,
+      "stride": 3.41,
+      "state": "rest"
+    },
+    {
+      "t": 110.01,
+      "mad": 0.9,
+      "stride": 2.65,
+      "state": "rest"
+    },
+    {
+      "t": 112.01,
+      "mad": 0.9,
+      "stride": 1.5,
+      "state": "rest"
+    },
+    {
+      "t": 114.01,
+      "mad": 0.8,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 116.01,
+      "mad": 0.9,
+      "stride": 3.06,
+      "state": "rest"
+    },
+    {
+      "t": 118.01,
+      "mad": 0.9,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 120.01,
+      "mad": 1.0,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 122.01,
+      "mad": 1.0,
+      "stride": 3.0,
+      "state": "rest"
+    },
+    {
+      "t": 124.01,
+      "mad": 0.8,
+      "stride": 3.12,
+      "state": "rest"
+    },
+    {
+      "t": 126.01,
+      "mad": 81.1,
+      "stride": 1.25,
+      "state": "walk"
+    },
+    {
+      "t": 128.01,
+      "mad": 160.3,
+      "stride": 0.94,
+      "state": "walk"
+    },
+    {
+      "t": 130.01,
+      "mad": 153.8,
+      "stride": 3.5,
+      "state": "walk"
+    },
+    {
+      "t": 132.01,
+      "mad": 138.8,
+      "stride": 3.19,
+      "state": "walk"
+    },
+    {
+      "t": 134.01,
+      "mad": 166.0,
+      "stride": 3.38,
+      "state": "walk"
+    },
+    {
+      "t": 136.01,
+      "mad": 154.4,
+      "stride": 3.43,
+      "state": "walk"
+    },
+    {
+      "t": 138.01,
+      "mad": 100.1,
+      "stride": 3.38,
+      "state": "walk"
+    },
+    {
+      "t": 140.01,
+      "mad": 133.3,
+      "stride": 3.88,
+      "state": "walk"
+    },
+    {
+      "t": 142.01,
+      "mad": 141.4,
+      "stride": 3.44,
+      "state": "walk"
+    },
+    {
+      "t": 144.01,
+      "mad": 95.4,
+      "stride": 3.19,
+      "state": "walk"
+    },
+    {
+      "t": 146.01,
+      "mad": 102.9,
+      "stride": 1.38,
+      "state": "walk"
+    },
+    {
+      "t": 148.01,
+      "mad": 123.5,
+      "stride": 3.31,
+      "state": "walk"
+    },
+    {
+      "t": 150.01,
+      "mad": 114.9,
+      "stride": 3.06,
+      "state": "walk"
+    },
+    {
+      "t": 152.01,
+      "mad": 108.8,
+      "stride": 2.25,
+      "state": "walk"
+    },
+    {
+      "t": 154.01,
+      "mad": 143.1,
+      "stride": 3.31,
+      "state": "walk"
+    },
+    {
+      "t": 156.01,
+      "mad": 159.5,
+      "stride": 4.38,
+      "state": "walk"
+    },
+    {
+      "t": 158.01,
+      "mad": 97.8,
+      "stride": 3.12,
+      "state": "walk"
+    },
+    {
+      "t": 160.01,
+      "mad": 87.6,
+      "stride": 3.0,
+      "state": "walk"
+    },
+    {
+      "t": 162.01,
+      "mad": 124.8,
+      "stride": 4.0,
+      "state": "walk"
+    },
+    {
+      "t": 164.01,
+      "mad": 117.9,
+      "stride": 2.12,
+      "state": "walk"
+    },
+    {
+      "t": 166.01,
+      "mad": 93.3,
+      "stride": 1.05,
+      "state": "walk"
+    },
+    {
+      "t": 168.01,
+      "mad": 105.9,
+      "stride": 2.61,
+      "state": "walk"
+    },
+    {
+      "t": 170.01,
+      "mad": 145.5,
+      "stride": 3.0,
+      "state": "walk"
+    },
+    {
+      "t": 172.01,
+      "mad": 150.0,
+      "stride": 4.06,
+      "state": "walk"
+    },
+    {
+      "t": 174.01,
+      "mad": 121.1,
+      "stride": 3.31,
+      "state": "walk"
+    },
+    {
+      "t": 176.01,
+      "mad": 84.5,
+      "stride": 2.25,
+      "state": "walk"
+    },
+    {
+      "t": 178.01,
+      "mad": 123.9,
+      "stride": 2.81,
+      "state": "walk"
+    },
+    {
+      "t": 180.01,
+      "mad": 155.8,
+      "stride": 3.56,
+      "state": "walk"
+    },
+    {
+      "t": 182.01,
+      "mad": 118.0,
+      "stride": 3.94,
+      "state": "walk"
+    },
+    {
+      "t": 184.01,
+      "mad": 104.1,
+      "stride": 2.31,
+      "state": "walk"
+    },
+    {
+      "t": 186.01,
+      "mad": 122.3,
+      "stride": 3.81,
+      "state": "walk"
+    },
+    {
+      "t": 188.01,
+      "mad": 171.3,
+      "stride": 4.06,
+      "state": "walk"
+    },
+    {
+      "t": 190.01,
+      "mad": 155.1,
+      "stride": 3.56,
+      "state": "walk"
+    },
+    {
+      "t": 192.01,
+      "mad": 104.5,
+      "stride": 1.94,
+      "state": "walk"
+    },
+    {
+      "t": 194.01,
+      "mad": 133.2,
+      "stride": 4.18,
+      "state": "walk"
+    },
+    {
+      "t": 196.01,
+      "mad": 149.6,
+      "stride": 3.84,
+      "state": "walk"
+    },
+    {
+      "t": 198.01,
+      "mad": 108.6,
+      "stride": 4.0,
+      "state": "walk"
+    },
+    {
+      "t": 200.01,
+      "mad": 106.3,
+      "stride": 1.44,
+      "state": "walk"
+    },
+    {
+      "t": 202.01,
+      "mad": 124.8,
+      "stride": 2.12,
+      "state": "walk"
+    },
+    {
+      "t": 204.01,
+      "mad": 110.7,
+      "stride": 3.56,
+      "state": "walk"
+    },
+    {
+      "t": 206.01,
+      "mad": 109.3,
+      "stride": 4.06,
+      "state": "walk"
+    },
+    {
+      "t": 208.01,
+      "mad": 133.9,
+      "stride": 4.06,
+      "state": "walk"
+    },
+    {
+      "t": 210.01,
+      "mad": 164.5,
+      "stride": 3.38,
+      "state": "walk"
+    },
+    {
+      "t": 212.01,
+      "mad": 160.8,
+      "stride": 3.75,
+      "state": "walk"
+    },
+    {
+      "t": 214.01,
+      "mad": 152.3,
+      "stride": 3.12,
+      "state": "walk"
+    },
+    {
+      "t": 216.01,
+      "mad": 151.3,
+      "stride": 3.38,
+      "state": "walk"
+    },
+    {
+      "t": 218.01,
+      "mad": 187.7,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 220.01,
+      "mad": 256.2,
+      "stride": 1.94,
+      "state": "walk"
+    },
+    {
+      "t": 222.01,
+      "mad": 215.7,
+      "stride": 1.84,
+      "state": "walk"
+    },
+    {
+      "t": 224.01,
+      "mad": 168.1,
+      "stride": 1.66,
+      "state": "walk"
+    },
+    {
+      "t": 226.01,
+      "mad": 191.7,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 228.01,
+      "mad": 187.8,
+      "stride": 1.94,
+      "state": "walk"
+    },
+    {
+      "t": 230.01,
+      "mad": 203.3,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 232.01,
+      "mad": 170.1,
+      "stride": 1.94,
+      "state": "walk"
+    },
+    {
+      "t": 234.01,
+      "mad": 157.4,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 236.01,
+      "mad": 172.6,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 238.01,
+      "mad": 169.7,
+      "stride": 1.75,
+      "state": "walk"
+    },
+    {
+      "t": 240.01,
+      "mad": 156.2,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 242.01,
+      "mad": 156.2,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 244.01,
+      "mad": 170.7,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 246.01,
+      "mad": 152.4,
+      "stride": 1.94,
+      "state": "walk"
+    },
+    {
+      "t": 248.01,
+      "mad": 196.5,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 250.01,
+      "mad": 226.2,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 252.01,
+      "mad": 193.2,
+      "stride": 2.0,
+      "state": "walk"
+    },
+    {
+      "t": 254.01,
+      "mad": 181.0,
+      "stride": 1.73,
+      "state": "walk"
+    },
+    {
+      "t": 256.01,
+      "mad": 177.9,
+      "stride": 2.12,
+      "state": "walk"
+    },
+    {
+      "t": 258.01,
+      "mad": 187.6,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 260.01,
+      "mad": 220.8,
+      "stride": 1.75,
+      "state": "walk"
+    },
+    {
+      "t": 262.01,
+      "mad": 195.5,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 264.01,
+      "mad": 154.8,
+      "stride": 1.94,
+      "state": "walk"
+    },
+    {
+      "t": 266.01,
+      "mad": 153.3,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 268.01,
+      "mad": 155.3,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 270.01,
+      "mad": 159.3,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 272.01,
+      "mad": 180.4,
+      "stride": 1.81,
+      "state": "walk"
+    },
+    {
+      "t": 274.01,
+      "mad": 156.1,
+      "stride": 1.88,
+      "state": "walk"
+    },
+    {
+      "t": 276.01,
+      "mad": 66.0,
+      "stride": 2.12,
+      "state": "walk"
+    },
+    {
+      "t": 278.01,
+      "mad": 2.4,
+      "stride": 3.88,
+      "state": "rest"
+    },
+    {
+      "t": 280.01,
+      "mad": 1.8,
+      "stride": 3.98,
+      "state": "rest"
+    },
+    {
+      "t": 282.01,
+      "mad": 1.1,
+      "stride": 3.3,
+      "state": "rest"
+    },
+    {
+      "t": 284.01,
+      "mad": 0.8,
+      "stride": 3.75,
+      "state": "rest"
+    },
+    {
+      "t": 286.01,
+      "mad": 0.8,
+      "stride": 2.31,
+      "state": "rest"
+    },
+    {
+      "t": 288.01,
+      "mad": 1.9,
+      "stride": 3.19,
+      "state": "rest"
+    },
+    {
+      "t": 290.01,
+      "mad": 1.9,
+      "stride": 0.69,
+      "state": "rest"
+    },
+    {
+      "t": 292.01,
+      "mad": 1.0,
+      "stride": 2.94,
+      "state": "rest"
+    },
+    {
+      "t": 294.01,
+      "mad": 1.4,
+      "stride": 3.5,
+      "state": "rest"
+    },
+    {
+      "t": 296.01,
+      "mad": 1.3,
+      "stride": 3.69,
+      "state": "rest"
+    },
+    {
+      "t": 298.01,
+      "mad": 0.7,
+      "stride": 4.0,
+      "state": "rest"
+    },
+    {
+      "t": 300.01,
+      "mad": 0.8,
+      "stride": 0.5,
+      "state": "rest"
+    },
+    {
+      "t": 302.01,
+      "mad": 1.4,
+      "stride": 3.19,
+      "state": "rest"
+    },
+    {
+      "t": 304.01,
+      "mad": 2.9,
+      "stride": 0.56,
+      "state": "rest"
+    },
+    {
+      "t": 306.01,
+      "mad": 3.7,
+      "stride": 2.75,
+      "state": "rest"
+    },
+    {
+      "t": 308.01,
+      "mad": 3.9,
+      "stride": 5.0,
+      "state": "rest"
+    },
+    {
+      "t": 310.01,
+      "mad": 4.3,
+      "stride": 2.89,
+      "state": "rest"
+    },
+    {
+      "t": 312.01,
+      "mad": 4.2,
+      "stride": 3.88,
+      "state": "rest"
+    },
+    {
+      "t": 314.01,
+      "mad": 4.4,
+      "stride": 2.94,
+      "state": "rest"
+    },
+    {
+      "t": 316.01,
+      "mad": 4.7,
+      "stride": 0.94,
+      "state": "rest"
+    },
+    {
+      "t": 318.01,
+      "mad": 5.2,
+      "stride": 3.12,
+      "state": "rest"
+    },
+    {
+      "t": 320.01,
+      "mad": 4.9,
+      "stride": 3.69,
+      "state": "rest"
+    },
+    {
+      "t": 322.01,
+      "mad": 3.3,
+      "stride": 3.81,
+      "state": "rest"
+    },
+    {
+      "t": 324.01,
+      "mad": 3.5,
+      "stride": 1.5,
+      "state": "rest"
+    },
+    {
+      "t": 326.01,
+      "mad": 3.6,
+      "stride": 4.19,
+      "state": "rest"
+    },
+    {
+      "t": 328.01,
+      "mad": 3.4,
+      "stride": 1.69,
+      "state": "rest"
+    },
+    {
+      "t": 330.01,
+      "mad": 2.2,
+      "stride": 3.75,
+      "state": "rest"
+    },
+    {
+      "t": 332.01,
+      "mad": 0.6,
+      "stride": 3.88,
+      "state": "rest"
+    },
+    {
+      "t": 334.01,
+      "mad": 2.2,
+      "stride": 3.88,
+      "state": "rest"
+    },
+    {
+      "t": 336.01,
+      "mad": 4.3,
+      "stride": 4.94,
+      "state": "rest"
+    },
+    {
+      "t": 338.01,
+      "mad": 4.5,
+      "stride": 1.19,
+      "state": "rest"
+    },
+    {
+      "t": 340.01,
+      "mad": 3.6,
+      "stride": 3.13,
+      "state": "rest"
+    },
+    {
+      "t": 342.01,
+      "mad": null,
+      "stride": null,
+      "state": "uncovered"
+    }
+  ],
+  "window_series_note": "4 s windows at a 2 s hop, as produced by experiments/gait_analysis.py; enough to redraw the figure without the raw recording"
 }

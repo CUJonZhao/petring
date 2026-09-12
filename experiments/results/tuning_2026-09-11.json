@@ -1,0 +1,67 @@
+{
+  "note": "Physical runs on 2026-09-11. Sampling comes from the session downloaded in each run; request time is measured as main-loop stalls in the serial log (one stall per HTTPS request).",
+  "sampling": [
+    {
+      "run": "physical_final",
+      "label": "before",
+      "mean_hz": 15.22,
+      "uncovered_percent": 28.5,
+      "interval_max_ms": 760
+    },
+    {
+      "run": "validation_20260911_215301",
+      "label": "cached free space A",
+      "mean_hz": 19.46,
+      "uncovered_percent": 3.1,
+      "interval_max_ms": 366
+    },
+    {
+      "run": "validation_20260911_215647",
+      "label": "cached free space B",
+      "mean_hz": 19.43,
+      "uncovered_percent": 3.7,
+      "interval_max_ms": 325
+    },
+    {
+      "run": "validation_20260911_221526",
+      "label": "radio change (reverted)",
+      "mean_hz": 19.53,
+      "uncovered_percent": 3.1,
+      "interval_max_ms": 317
+    },
+    {
+      "run": "indoor_labeled",
+      "label": "indoor calibration",
+      "mean_hz": 19.53,
+      "uncovered_percent": 2.5,
+      "interval_max_ms": 360
+    }
+  ],
+  "request_ms": [
+    {
+      "label": "before",
+      "value": 4830,
+      "detail": "每请求都重新握手，串口日志阻塞中位数"
+    },
+    {
+      "label": "reuse broken",
+      "value": 4431,
+      "detail": "HTTPClient 析构关掉了保留的 socket，reused=0"
+    },
+    {
+      "label": "reuse working",
+      "value": 1022,
+      "detail": "cloudtest 两次 reused=1：1012 与 1031 ms"
+    },
+    {
+      "label": "Mac, same endpoint",
+      "value": 879,
+      "detail": "measure_cloud_latency.py 复用连接中位数，作为下界参考"
+    }
+  ],
+  "upload_estimate_min": {
+    "before": 7.8,
+    "after": 1.9,
+    "basis": "一小时记录约 1.73 MB，109 个请求"
+  }
+}
