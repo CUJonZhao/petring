@@ -18,6 +18,7 @@ void String::reserve(unsigned int) {}
 bool HTTPClient::begin(WiFiClient&, String) { return false; } void HTTPClient::end() {}
 void HTTPClient::addHeader(const String&, const String&, bool, bool) {} void HTTPClient::setConnectTimeout(int32_t) {}
 void HTTPClient::setTimeout(uint16_t) {} void HTTPClient::setFollowRedirects(followRedirects_t) {}
+void HTTPClient::collectHeaders(const char**, const size_t) {} String HTTPClient::header(const char*) { return String(); }
 int HTTPClient::GET() { return -1; } int HTTPClient::POST(uint8_t*, size_t) { return -1; } String HTTPClient::getString() { return String(); }
 void WiFiClientSecure::setCACert(const char*) {} void WiFiClientSecure::setHandshakeTimeout(unsigned long) {}
 bool Preferences::begin(const char*, bool, const char*) { return false; } void Preferences::end() {}

@@ -6,4 +6,5 @@ class HTTPClient { public:
   bool begin(WiFiClient& client, String url); void end(void);
   void addHeader(const String& name, const String& value, bool first = false, bool replace = true);
   void setConnectTimeout(int32_t connectTimeout); void setTimeout(uint16_t timeout); void setFollowRedirects(followRedirects_t follow);
+  void collectHeaders(const char* headerKeys[], const size_t headerKeysCount); String header(const char* name);
   int GET(); int POST(uint8_t* payload, size_t size); int POST(String payload); String getString(void); };

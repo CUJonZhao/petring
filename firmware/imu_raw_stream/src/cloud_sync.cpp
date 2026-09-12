@@ -343,8 +343,12 @@ CloudSync::Result CloudSync::request(const char* action, const String& query,
                  strcmp(action, "heartbeat") == 0 ? "application/json" : "application/octet-stream");
   // HTTPClient omits Content-Length for an empty body; some front ends reject such POSTs.
   if (post && !size) http.addHeader("Content-Length", "0");
+  // Redirects are never followed with credentials; log where the host wanted to send us.
+  const char* collect[] = {"Location"};
+  http.collectHeaders(collect, 1);
   const int code = post ? http.POST(const_cast<uint8_t*>(bytes), size) : http.GET();
   body_ = code > 0 ? http.getString() : "";
+  const String location = code >= 300 && code < 400 ? http.header("Location") : String();
   http.end();
   if (code == 200) {
     error_ = "";
@@ -352,6 +356,7 @@ CloudSync::Result CloudSync::request(const char* action, const String& query,
   }
   error_ = "http_" + String(code);
   Serial.printf("STATUS,cloud_http,action=%s,code=%d,body=%.96s\n", action, code, body_.c_str());
+  if (location.length()) Serial.printf("STATUS,cloud_redirect,to=%.120s\n", location.c_str());
   if (code == 401 || code == 403 || (code >= 300 && code < 400)) return Result::auth;
   if (code == 400 || code == 413 || code == 422) return Result::reject;
   return Result::retry;
