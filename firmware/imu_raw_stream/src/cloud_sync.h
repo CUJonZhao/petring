@@ -38,6 +38,7 @@ class CloudSync {
   int send(const char* action, const String& query, const uint8_t* bytes, size_t size,
            bool post, String& location);
   void closeConnection();
+  void setRadioAwake(bool awake);
   bool confirmed() const;
   std::vector<Entry> scan();
   bool selectFile();
@@ -57,7 +58,7 @@ class CloudSync {
   size_t size_ = 0, offset_ = 0;
   bool enabled_ = false, atHome_ = false, knownOffset_ = false;
   bool wasRecording_ = false, holdUntilHome_ = false, rejectsCleared_ = false;
-  bool socketOpen_ = false;
+  bool socketOpen_ = false, radioAwake_ = false;
   uint32_t awaySince_ = 0, homeSince_ = 0, startRetryAt_ = 0, retryAt_ = 0;
   uint32_t lastHeartbeat_ = 0, lastScan_ = 0, lastPruneCheck_ = 0;
   uint32_t pending_ = 0, synced_ = 0, rejected_ = 0, uploaded_ = 0, pruned_ = 0;

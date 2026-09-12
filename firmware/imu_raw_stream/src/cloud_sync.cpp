@@ -2,6 +2,7 @@
 
 #include <HTTPClient.h>
 #include <Preferences.h>
+#include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <mbedtls/sha256.h>
 #include <sys/time.h>
@@ -347,6 +348,7 @@ int CloudSync::send(const char* action, const String& query, const uint8_t* byte
   http.setConnectTimeout(8000);
   http.setTimeout(15000);
   http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+  setRadioAwake(true);
   if (!http.begin(client_, url_ + "/api/device/" + action + query)) return 0;
   socketOpen_ = true;  // even a failed attempt leaves a socket worth closing
   http.addHeader("OAI-Sites-Authorization", "Bearer " + bypass_);
@@ -366,9 +368,20 @@ int CloudSync::send(const char* action, const String& query, const uint8_t* byte
 }
 
 void CloudSync::closeConnection() {
+  setRadioAwake(false);
   if (!socketOpen_) return;
   client_.stop();
   socketOpen_ = false;
+}
+
+void CloudSync::setRadioAwake(bool awake) {
+  if (radioAwake_ == awake) return;
+  // Station modem sleep parks the radio between beacons, so every round trip
+  // waits for the next wake-up: the board needed about 4.2 s per request where
+  // the same site answered a laptop in 0.9 s. Stay awake only while syncing at
+  // home; recording away keeps the default power saving.
+  WiFi.setSleep(!awake);
+  radioAwake_ = awake;
 }
 
 CloudSync::Result CloudSync::request(const char* action, const String& query,

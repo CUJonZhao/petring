@@ -23,3 +23,6 @@ int HTTPClient::GET() { return -1; } int HTTPClient::POST(uint8_t*, size_t) { re
 void WiFiClientSecure::setCACert(const char*) {} void WiFiClientSecure::setHandshakeTimeout(unsigned long) {}
 bool Preferences::begin(const char*, bool, const char*) { return false; } void Preferences::end() {}
 size_t Preferences::putString(const char*, String) { return 0; } String Preferences::getString(const char*, String d) { return d; }
+#include "WiFi.h"
+WiFiClass WiFi;
+void WiFiClass::setSleep(bool) {}
