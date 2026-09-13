@@ -120,6 +120,11 @@ Recommended next steps:
    flash writes and recheck interval distribution.
 4. Run a one-hour manual recording on battery power and inspect actual sampling
    gaps, voltage trend, flash usage, full-session retrieval, and home upload.
+   The prepared operator helper is
+   [`experiments/battery_recording_session.py`](experiments/battery_recording_session.py):
+   check `status` while charging; after USB is unplugged and the board is back
+   on home Wi-Fi, start only with `start --confirm-battery-only`; reconnect USB
+   at the end and use `stop` to preserve and cross-check the CSV and binary.
 5. Use real recordings to refine activity reports. Do not advance wearing/dog
    testing until the user resumes that work.
 
