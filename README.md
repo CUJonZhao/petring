@@ -16,7 +16,8 @@ but ended at the recorder's storage limit rather than through a manual stop; see
 Website source is backed up in the private
 [petring-site repository](https://github.com/CUJonZhao/petring-site).
 
-**Resume here (2026-09-11):** [Today's report / 今日报告](docs/2026-09-11_daily_report.md) ·
+**Resume here (2026-09-13):** [Today's report / 今日报告](docs/2026-09-13_daily_report.md) ·
+[long battery recording](experiments/battery_recorded_long_2026-09-13.md) ·
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
 The board records by itself away from home Wi-Fi, closes the session after it reconnects,
 uploads it to the private site, and frees space only from cloud-confirmed sessions.
@@ -143,6 +144,7 @@ Recommended next steps:
 - `docs/2026-09-09_stage1b_tray_fit_and_cable_routing.md`
 - `docs/2026-09-09_stage1b_handoff.md`
 - [2026-09-11 daily report](docs/2026-09-11_daily_report.md)
+- [2026-09-13 daily report](docs/2026-09-13_daily_report.md)
 - [Home Wi-Fi auto sync](docs/2026-09-11_home_wifi_cloud_sync.md)
 - [2026-09-09 daily report](docs/2026-09-09_daily_report.md)
 - [Offline recording handoff](docs/2026-09-09_offline_motion_logging.md)

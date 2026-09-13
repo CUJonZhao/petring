@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Operate and preserve one battery-powered Delta recording session.
 
-Use ``status`` while USB is attached.  After unplugging USB and confirming the
-board has rejoined home Wi-Fi, use ``start --confirm-battery-only``.  At the
-end, reconnect USB, wait for Wi-Fi, then use ``stop`` to stop, download and
-cross-check the completed session.
+Use ``status`` while USB is attached. After unplugging USB and confirming the
+board has rejoined home Wi-Fi, use ``start --confirm-battery-only``. At the
+end, return to home Wi-Fi but keep USB disconnected; use ``stop`` to stop,
+download and cross-check the completed session. Reconnect USB only after that
+clean stop.
 
 The explicit confirmation prevents accidentally starting the battery test
 while the USB cable is still powering the board.
@@ -15,7 +16,6 @@ import hashlib
 import io
 import json
 from pathlib import Path
-import sys
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
