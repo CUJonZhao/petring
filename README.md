@@ -8,11 +8,13 @@ sessions in a phone browser, and sync them automatically to a private website
 after the board returns to home Wi-Fi. A harness-mounted walking monitor is being explored
 because of the assembled enclosure's size; wearing/dog tests are deferred.
 
-**Latest (2026-09-12):** The one-hour unattended battery-only bench run passed:
-63 min 02 s without a reset, with voltage falling from 3.914 to 3.756 V. It
-validated runtime and voltage logging, but did not make a motion recording; see
-[the battery bench result](experiments/battery_bench_1h_2026-09-12.md). Website
-source is now backed up in the private [petring-site repository](https://github.com/CUJonZhao/petring-site), and the analysis update is live.
+**Latest (2026-09-13):** The manual battery recording requirement passed. Session
+`bfe0a2f2` saved 150,289 samples across 130 min 38 s, then reached the private
+website with its binary integrity check passed. It exceeded the one-hour target,
+but ended at the recorder's storage limit rather than through a manual stop; see
+[the long recording result](experiments/battery_recorded_long_2026-09-13.md).
+Website source is backed up in the private
+[petring-site repository](https://github.com/CUJonZhao/petring-site).
 
 **Resume here (2026-09-11):** [Today's report / 今日报告](docs/2026-09-11_daily_report.md) ·
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
@@ -22,8 +24,7 @@ uploads it to the private site, and frees space only from cloud-confirmed sessio
 started from movement alone while still on home Wi-Fi, ended itself after five minutes
 of stillness, uploaded, and appeared on the private site: 6,724 samples at 19.53 Hz.
 Rest/walk is calibrated from a labelled indoor recording (149/149 windows agreed); the
-run boundary is not. Open: a one-hour recorded battery run and wearing it on
-Delta's harness.
+run boundary is not. Open: a short real walk and wearing it on Delta's harness.
 
 Previous (2026-09-09): [Today's report, photos and next steps / 今日报告](docs/2026-09-09_daily_report.md).
 [Firmware handoff / 软件交接](docs/2026-09-09_offline_motion_logging.md).
@@ -32,8 +33,8 @@ has now been backed up/upgraded and tested on the board: a two-minute USB run
 saved 2,279 samples through a Wi-Fi-off interval; CSV/binary comparison and
 restart persistence passed. See the [physical report](experiments/offline_usb_bench_2026-09-09.md).
 Average sampling was 18.97 Hz with flash-write timing gaps. The one-hour
-battery supply test has now passed; a one-hour *recorded* battery session and
-wearing/dog testing remain pending.
+battery supply and recorded-battery tests have passed; wearing/dog testing
+remains pending.
 Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.md).
 
 - [Current print package](hardware/enclosure/print_packages/delta_collar_v0_4_fit_print_20260909.zip)
@@ -47,8 +48,8 @@ Earlier mechanical details: [Stage 1B handoff](docs/2026-09-09_stage1b_handoff.m
 
 Current status: Stage 1B home Wi-Fi auto-sync is implemented and passed a physical
 bench end to end (record away, auto-close at home, upload, site confirmation).
-The one-hour battery supply validation has passed. A real walk and a one-hour
-recorded battery session remain pending.
+The one-hour battery supply and recorded-battery validations have passed. A
+real walk remains pending.
 
 Stage 1A hardware bring-up is complete. The ESP32 Feather/HUZZAH32 V2,
 LSM6DSOX IMU, LiPo battery path, Wi-Fi dashboard, enclosed USB bench test,
@@ -58,7 +59,7 @@ current enclosure is larger than desired for Delta.
 
 Stage 1B focuses on:
 
-- One-hour battery-only recording and recovery testing.
+- Reviewing the long battery recording's sampling gaps and capacity limit.
 - Full-resolution data capture and automatic summary plots.
 - Activity/rest threshold review from repeatable bench and hand-motion tests.
 - Documenting the completed v0.4 enclosure and its remaining fit/retention details.
@@ -113,19 +114,12 @@ Stage 1 intentionally does not include medical diagnosis, production waterproofi
 
 Recommended next steps:
 
-1. Confirm the uploaded session on the private site, let the board finish its
-   2.3 MiB backlog at home, then take one real short walk end to end.
+1. Take one supervised short real walk end to end: begin on battery, leave home
+   Wi-Fi, return, and confirm automatic close and upload on the private site.
 2. Review/download the real short recording in the phone-friendly `/records` page.
 3. If fixed-rate behavior analysis is required, decouple sampling from synchronous
    flash writes and recheck interval distribution.
-4. Run a one-hour manual recording on battery power and inspect actual sampling
-   gaps, voltage trend, flash usage, full-session retrieval, and home upload.
-   The prepared operator helper is
-   [`experiments/battery_recording_session.py`](experiments/battery_recording_session.py):
-   check `status` while charging; after USB is unplugged and the board is back
-   on home Wi-Fi, start only with `start --confirm-battery-only`; reconnect USB
-   at the end and use `stop` to preserve and cross-check the CSV and binary.
-5. Use real recordings to refine activity reports. Do not advance wearing/dog
+4. Use real recordings to refine activity reports. Do not advance wearing/dog
    testing until the user resumes that work.
 
 ## Repository Layout
