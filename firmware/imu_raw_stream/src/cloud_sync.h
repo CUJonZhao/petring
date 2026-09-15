@@ -9,8 +9,9 @@
 // Home Wi-Fi sync. While the saved home network is out of reach the board
 // records by itself; after a stable home connection it closes that session
 // and uploads every session the website has not yet confirmed, in resumable
-// 16 KiB chunks. Cloud-confirmed sessions are deleted locally only when space
-// for about an hour of recording is needed (oldest first).
+// 16 KiB chunks. When space is needed, cloud-confirmed sessions go first. If
+// the device is still away and would otherwise stop, older local-only segments
+// are then evicted oldest-first so the most recent recording can continue.
 class CloudSync {
  public:
   explicit CloudSync(MotionLogger& logger) : logger_(logger) {}
@@ -20,6 +21,8 @@ class CloudSync {
   void tick(bool connected, bool imuReady, bool active, float voltage);
   bool configure(const String& line);
   bool enabled() const { return enabled_; }
+  // Manual recordings share the same retention policy when cloud sync is set up.
+  bool startManual(uint64_t unixMs);
   String statusJson() const;
   uint64_t unixMs() const;
   // Read-only probe of the site's status endpoint, for timing only (serial "T").
@@ -49,7 +52,11 @@ class CloudSync {
   std::vector<Entry> scan();
   bool selectFile();
   bool hashFile();
-  size_t prune(size_t targetFree);
+  size_t prune(size_t targetFree, bool allowLocalOnly = false,
+               const String& preserve = String());
+  bool makeRoomForStart(size_t targetFree);
+  bool maintainRecordingSpace(uint32_t now, uint8_t trigger);
+  bool rollover(uint32_t now, uint8_t trigger);
   void clearMarkers(const char* ext);
   void markFile(const char* ext);
   void markDone();
@@ -72,6 +79,7 @@ class CloudSync {
   uint32_t awaySince_ = 0, homeSince_ = 0, startRetryAt_ = 0, retryAt_ = 0;
   uint32_t lastHeartbeat_ = 0, lastScan_ = 0, lastPruneCheck_ = 0;
   uint32_t activeSince_ = 0, lastActiveMs_ = 0, motionSuppressUntil_ = 0;
-  uint32_t pending_ = 0, synced_ = 0, rejected_ = 0, uploaded_ = 0, pruned_ = 0;
+  uint32_t pending_ = 0, synced_ = 0, rejected_ = 0, uploaded_ = 0, pruned_ = 0,
+           evicted_ = 0;
   uint64_t lastSyncUnixMs_ = 0;
 };

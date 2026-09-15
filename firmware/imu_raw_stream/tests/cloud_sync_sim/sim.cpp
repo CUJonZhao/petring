@@ -1,5 +1,6 @@
-// Host simulation of CloudSync: pruning only removes cloud-confirmed sessions (oldest first),
-// never unconfirmed or in-progress ones; uploads pick the newest unconfirmed session.
+// Host simulation of CloudSync: default pruning removes only cloud-confirmed
+// sessions; the latest-record fallback evicts old local-only sessions only when
+// explicitly requested and never touches the active session.
 // Build/run: sh run.sh (compiles the real src/cloud_sync.cpp and src/motion_logger.cpp).
 #include <cassert>
 #include <cstdarg>
@@ -86,5 +87,17 @@ int main() {
   sync.id_ = "aa000001"; sync.sha_ = String(std::string(64, 'f').c_str());
   sync.markDone();
   assert(has("/aa000001.ack") && g_files["/aa000001.ack"].size() == 64 && !has("/aa000001.retry"));
+  // Latest-record fallback: when confirmed copies are exhausted, remove only
+  // the oldest closed local file and keep the active/newest one intact.
+  g_files.clear();
+  session("10000001", ".bin", 1789000001000ULL, 1000000, false);
+  session("20000002", ".bin", 1789000002000ULL, 1000000, false);
+  session("30000003", ".open", 1789000003000ULL, 1000000, false);
+  logger.recording_ = true; logger.id_ = "30000003";
+  const size_t freeBeforeFallback = logger.freeBytes();
+  const size_t fallback = sync.prune(freeBeforeFallback + 900000, true);
+  assert(fallback == 1 && !has("/10000001.bin"));
+  assert(has("/20000002.bin") && has("/30000003.open"));
+  assert(sync.evicted_ == 1);
   puts("SIM PASS");
 }

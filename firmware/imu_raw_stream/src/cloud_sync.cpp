@@ -29,7 +29,8 @@ constexpr uint32_t kStillStopMs = 300000;
 constexpr uint32_t kMotionHoldMs = 120000;  // after a session ends at home
 constexpr size_t kChunkBytes = 16384;
 // About one hour at 20 Hz (1.73 MB) after the recorder's 128 KiB reserve and
-// its 15% filesystem allowance. Only cloud-confirmed sessions are removed.
+// its 15% filesystem allowance. Confirmed sessions are removed first; a local
+// oldest-first fallback exists only to keep a long away recording going.
 constexpr size_t kPruneTargetBytes = 2300000;
 // During a long outing, free more space only when nearly full.
 constexpr size_t kPruneLowWaterBytes = 512 * 1024;
@@ -146,6 +147,8 @@ String CloudSync::statusJson() const {
   s += uploaded_;
   s += ",\"pruned_this_boot\":";
   s += pruned_;
+  s += ",\"evicted_this_boot\":";
+  s += evicted_;
   s += ",\"upload_id\":\"";
   s += id_;
   s += "\",\"offset\":";
@@ -175,6 +178,53 @@ void CloudSync::trackMotion(uint32_t now, bool active) {
   lastActiveMs_ = now ? now : 1;
 }
 
+bool CloudSync::startManual(uint64_t unixMs) {
+  if (!enabled_) return logger_.start(unixMs, 'u');
+  if (!makeRoomForStart(kPruneTargetBytes)) {
+    error_ = "storage_full";
+    return false;
+  }
+  return logger_.start(unixMs, 'u');
+}
+
+bool CloudSync::makeRoomForStart(size_t targetFree) {
+  prune(targetFree);
+  // Starting a new segment is the safe point to make the requested
+  // latest-record retention trade-off: do not fail the new record merely
+  // because old local-only sessions have not reached home Wi-Fi yet.
+  if (logger_.freeBytes() < motion::kReserveBytes + 4096) prune(targetFree, true);
+  return logger_.freeBytes() >= motion::kReserveBytes + 4096;
+}
+
+bool CloudSync::rollover(uint32_t now, uint8_t trigger) {
+  // One file cannot discard its own head safely. End it cleanly, protect that
+  // newest closed segment, free older history if necessary, then continue in a
+  // new segment. The website receives the segments newest-first on return home.
+  const String preserve = logger_.id_;
+  if (!logger_.stop("complete")) {
+    error_ = "record_rollover_finalize_failed";
+    return false;
+  }
+  prune(kPruneTopUpBytes);
+  if (logger_.freeBytes() < kPruneTopUpBytes) prune(kPruneTopUpBytes, true, preserve);
+  if (!logger_.start(unixMs(), trigger)) {
+    error_ = "record_rollover_start_failed_" + logger_.error_;
+    return false;
+  }
+  lastPruneCheck_ = now;
+  Serial.printf("STATUS,motion_rollover,kept=%s,new=%s\n", preserve.c_str(), logger_.id_.c_str());
+  return true;
+}
+
+bool CloudSync::maintainRecordingSpace(uint32_t now, uint8_t trigger) {
+  if (now - lastPruneCheck_ < kPruneCheckMs) return true;
+  lastPruneCheck_ = now;
+  if (logger_.freeBytesCached() >= kPruneLowWaterBytes) return true;
+  prune(kPruneTopUpBytes);
+  if (logger_.freeBytes() < kPruneLowWaterBytes) prune(kPruneTopUpBytes, true);
+  return logger_.freeBytes() >= kPruneLowWaterBytes || rollover(now, trigger);
+}
+
 bool CloudSync::sustainedMotion(uint32_t now) const {
   return activeSince_ && now - lastActiveMs_ <= kMotionGapMs && now - activeSince_ >= kMotionStartMs;
 }
@@ -194,9 +244,9 @@ void CloudSync::away(uint32_t now, bool imuReady) {
   if (wasRecording_ && !recording && logger_.lastStop_ == "complete") holdUntilHome_ = true;
   if (recording) {
     mode_ = "recording";
-    if (now - lastPruneCheck_ >= kPruneCheckMs) {
-      lastPruneCheck_ = now;
-      if (logger_.freeBytesCached() < kPruneLowWaterBytes) prune(kPruneTopUpBytes);
+    if (!maintainRecordingSpace(now, 'w')) {
+      mode_ = "error";
+      startRetryAt_ = after(now, kStartRetryMs);
     }
     return;
   }
@@ -214,8 +264,7 @@ void CloudSync::away(uint32_t now, bool imuReady) {
     return;
   }
   if (!due(now, startRetryAt_)) return;
-  prune(kPruneTargetBytes);
-  if (logger_.start(unixMs(), 'w')) {
+  if (makeRoomForStart(kPruneTargetBytes) && logger_.start(unixMs(), 'w')) {
     mode_ = "recording";
     error_ = "";
     startRetryAt_ = 0;
@@ -245,6 +294,11 @@ void CloudSync::home(uint32_t now, bool imuReady, float voltage) {
     // while, because an outing can stay inside home Wi-Fi the whole time. A
     // session the user started by hand stays under their control.
     mode_ = startedByMotion_ ? "recording" : "home_recording";
+    if (!maintainRecordingSpace(now, startedByMotion_ ? 'm' : 'u')) {
+      mode_ = "error";
+      motionSuppressUntil_ = after(now, kStartRetryMs);
+      return;
+    }
     if (startedByMotion_ && stillFor(now, kStillStopMs)) {
       if (!logger_.stop()) error_ = "record_finalize_failed";
       startedByMotion_ = false;
@@ -258,8 +312,7 @@ void CloudSync::home(uint32_t now, bool imuReady, float voltage) {
   }
   // Worn and moving while still in range: record the outing anyway.
   if (imuReady && due(now, motionSuppressUntil_) && sustainedMotion(now)) {
-    prune(kPruneTargetBytes);
-    if (logger_.start(unixMs(), 'm')) {
+    if (makeRoomForStart(kPruneTargetBytes) && logger_.start(unixMs(), 'm')) {
       startedByMotion_ = true;
       mode_ = "recording";
       error_ = "";
@@ -575,37 +628,48 @@ bool CloudSync::hashFile() {
   return true;
 }
 
-size_t CloudSync::prune(size_t targetFree) {
+size_t CloudSync::prune(size_t targetFree, bool allowLocalOnly, const String& preserve) {
   if (logger_.freeBytes() >= targetFree) return 0;
   const std::vector<Entry> entries = scan();
   const String current = logger_.recording() ? logger_.id_ : String();
-  std::vector<const Entry*> candidates;
+  std::vector<const Entry*> confirmed, localOnly;
   for (const Entry& e : entries) {
     if (e.path.isEmpty()) {  // markers whose session is already gone
       removeIfPresent(logger_.fs_, "/" + e.id + ".ack");
       removeIfPresent(logger_.fs_, "/" + e.id + ".retry");
       removeIfPresent(logger_.fs_, "/" + e.id + ".reject");
-    } else if (e.ack && e.id != current) {
-      candidates.push_back(&e);
+    } else if (e.id != current && e.id != preserve) {
+      if (e.ack) confirmed.push_back(&e);
+      else if (allowLocalOnly) localOnly.push_back(&e);
     }
   }
   // Oldest first; sessions without a calendar start time count as oldest.
-  std::stable_sort(candidates.begin(), candidates.end(),
-                   [](const Entry* a, const Entry* b) { return a->startMs < b->startMs; });
+  const auto oldestFirst = [](const Entry* a, const Entry* b) { return a->startMs < b->startMs; };
+  std::stable_sort(confirmed.begin(), confirmed.end(), oldestFirst);
+  std::stable_sort(localOnly.begin(), localOnly.end(), oldestFirst);
   size_t removed = 0;
-  for (const Entry* e : candidates) {
-    if (logger_.freeBytes() >= targetFree) break;
-    if (!logger_.fs_.remove(e->path)) {
-      error_ = "prune_failed";
-      break;
+  const auto removeCandidates = [this, targetFree, &removed](const std::vector<const Entry*>& candidates) {
+    for (const Entry* e : candidates) {
+      if (logger_.freeBytes() >= targetFree) break;
+      const bool local = !e->ack;
+      if (!logger_.fs_.remove(e->path)) {
+        error_ = "prune_failed";
+        break;
+      }
+      removeIfPresent(logger_.fs_, "/" + e->id + ".ack");
+      removeIfPresent(logger_.fs_, "/" + e->id + ".retry");
+      removeIfPresent(logger_.fs_, "/" + e->id + ".reject");
+      ++removed;
+      ++pruned_;
+      if (local) ++evicted_;
+      else if (synced_) --synced_;
+      Serial.printf("STATUS,cloud_pruned,id=%s,bytes=%u,local_only=%d\n", e->id.c_str(),
+                    unsigned(e->size), local ? 1 : 0);
     }
-    removeIfPresent(logger_.fs_, "/" + e->id + ".ack");
-    removeIfPresent(logger_.fs_, "/" + e->id + ".retry");
-    ++removed;
-    ++pruned_;
-    if (synced_) --synced_;
-    Serial.printf("STATUS,cloud_pruned,id=%s,bytes=%u\n", e->id.c_str(), unsigned(e->size));
-  }
+  };
+  removeCandidates(confirmed);
+  if (logger_.freeBytes() < targetFree && allowLocalOnly) removeCandidates(localOnly);
+  logger_.refreshFree();
   return removed;
 }
 

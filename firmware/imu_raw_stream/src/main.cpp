@@ -385,7 +385,7 @@ void handleSerialCommands() {
         break;
       case 'R':
       case 'r':
-        if (!imuReady || !motionLogger.start(0, 'u')) Serial.println("ERROR,motion_start_failed");
+        if (!imuReady || !cloudSync.startManual(0)) Serial.println("ERROR,motion_start_failed");
         break;
       case 'S':
       case 's':
@@ -579,7 +579,7 @@ void startDashboard() {
         server.send(400, "application/json", "{\"error\":\"invalid_unix_ms\"}"); return;
       }
     }
-    const bool ok = motionLogger.start(unixMs, 'u');
+    const bool ok = cloudSync.startManual(unixMs);
     server.send(ok ? 200 : 503, "application/json", motionLogger.statusJson());
   });
   server.on("/api/recording/stop", HTTP_POST, []() {

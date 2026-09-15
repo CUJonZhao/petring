@@ -7,6 +7,7 @@ void api_check(CloudSync& sync, const String& provisioning) {
   sync.tick(true, true, false, 4.0f);
   (void)sync.configure(provisioning);
   (void)sync.enabled();
+  (void)sync.startManual(0);
   (void)sync.statusJson();
   (void)sync.unixMs();
   sync.selfTest();

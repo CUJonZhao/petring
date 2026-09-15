@@ -93,9 +93,9 @@ async function cloud(){
     const c = await (await request('/api/cloud')).json();
     cloudOn = !!c.configured; $('cloud-panel').hidden = !cloudOn;
     if(!cloudOn) return;
-    $('intro').textContent = '已开启自动记录：离开家里 Wi-Fi 约 10 秒后开始；在家范围内持续活动约 30 秒也会开始，静止 5 分钟后自动结束。回家连上 Wi-Fi 15 秒后自动结束并上传到网站。上传经网站校验后，空间不足时才从设备上删除最旧的已上传记录。';
+    $('intro').textContent = '已开启自动记录：离开家里 Wi-Fi 约 10 秒后开始；在家范围内持续活动约 30 秒也会开始，静止 5 分钟后自动结束。回家连上 Wi-Fi 15 秒后自动结束并上传到网站。空间不足时先删除网站已确认的最旧记录；若仍不足，才删除最旧的仅本地分段，以持续保留最新记录。';
     $('cloud-state').textContent = cloudModes[c.mode] || c.mode;
-    $('cloud-detail').textContent = '待上传 ' + c.pending + ' 段 · 设备上已上传 ' + c.synced + ' 段' + (c.rejected ? ' · 网站拒收 ' + c.rejected + ' 段' : '') + (c.pruned_this_boot ? ' · 本次开机清理 ' + c.pruned_this_boot + ' 段' : '') + (c.mode === 'syncing' && c.bytes ? ' · 当前 ' + Math.round(100 * c.offset / c.bytes) + '%' : '') + (c.error ? ' · ' + c.error : '') + (c.last_sync_unix_ms ? ' · 最近上传 ' + new Date(c.last_sync_unix_ms).toLocaleString() : '');
+    $('cloud-detail').textContent = '待上传 ' + c.pending + ' 段 · 设备上已上传 ' + c.synced + ' 段' + (c.rejected ? ' · 网站拒收 ' + c.rejected + ' 段' : '') + (c.pruned_this_boot ? ' · 本次开机清理 ' + c.pruned_this_boot + ' 段' : '') + (c.evicted_this_boot ? ' · 其中仅本地旧段 ' + c.evicted_this_boot + ' 段' : '') + (c.mode === 'syncing' && c.bytes ? ' · 当前 ' + Math.round(100 * c.offset / c.bytes) + '%' : '') + (c.error ? ' · ' + c.error : '') + (c.last_sync_unix_ms ? ' · 最近上传 ' + new Date(c.last_sync_unix_ms).toLocaleString() : '');
     $('cloud-site').textContent = c.site; $('cloud-site').href = c.site;
   } catch { $('cloud-panel').hidden = true; }
 }

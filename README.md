@@ -8,19 +8,19 @@ sessions in a phone browser, and sync them automatically to a private website
 after the board returns to home Wi-Fi. A harness-mounted walking monitor is being explored
 because of the assembled enclosure's size; wearing/dog tests are deferred.
 
-**Latest (2026-09-13):** The manual battery recording requirement passed. Session
-`bfe0a2f2` saved 150,289 samples across 130 min 38 s, then reached the private
-website with its binary integrity check passed. It exceeded the one-hour target,
-but ended at the recorder's storage limit rather than through a manual stop; see
-[the long recording result](experiments/battery_recorded_long_2026-09-13.md).
-Website source is backed up in the private
-[petring-site repository](https://github.com/CUJonZhao/petring-site).
+**Latest (2026-09-15):** The first Delta-worn outing reached the private website:
+two adjacent sessions contain 7,604 valid samples across 6 min 26 s. The second
+file passed the site's integrity check, though its unconfirmed end coincided with
+a low 3.13 V reading. The site now uses conservative activity labels rather than
+claiming dog walk/run recognition. See [today's report](docs/2026-09-15_daily_report.md).
 
-**Resume here (2026-09-13):** [Today's report / 今日报告](docs/2026-09-13_daily_report.md) ·
+**Resume here (2026-09-15):** [Today's report / 今日报告](docs/2026-09-15_daily_report.md) ·
 [long battery recording](experiments/battery_recorded_long_2026-09-13.md) ·
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
 The board records by itself away from home Wi-Fi, closes the session after it reconnects,
-uploads it to the private site, and frees space only from cloud-confirmed sessions.
+uploads it to the private site, and keeps the newest segments when storage is full:
+it deletes cloud-confirmed history first, then only the oldest local-only segment
+if that is needed for recording to continue.
 **Validated on the board (2026-09-11):** the loop now runs unattended. A session
 started from movement alone while still on home Wi-Fi, ended itself after five minutes
 of stillness, uploaded, and appeared on the private site: 6,724 samples at 19.53 Hz.

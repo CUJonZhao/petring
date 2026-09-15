@@ -7,7 +7,7 @@ const b=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM
 let mode='syncing';
 await page.route('http://delta.test/**',async r=>{const u=new URL(r.request().url());const reply=(x,s=200)=>r.fulfill({status:s,contentType:'application/json',body:JSON.stringify(x)});
  if(u.pathname==='/records')return r.fulfill({contentType:'text/html',body:html});
- if(u.pathname==='/api/cloud')return reply({configured:true,mode,error:'',site:'https://example.test',pending:1,synced:2,rejected:0,uploaded_this_boot:2,pruned_this_boot:1,upload_id:'cafe1234',offset:16384,bytes:32768,clock_ready:true,last_sync_unix_ms:1789150000000});
+ if(u.pathname==='/api/cloud')return reply({configured:true,mode,error:'',site:'https://example.test',pending:1,synced:2,rejected:0,uploaded_this_boot:2,pruned_this_boot:1,evicted_this_boot:1,upload_id:'cafe1234',offset:16384,bytes:32768,clock_ready:true,last_sync_unix_ms:1789150000000});
  if(u.pathname==='/api/recording')return reply({ready:true,recording:false,id:'abcdef12',saved_samples:1200,buffered_samples:0,elapsed_ms:0,read_errors:0,free_bytes:2400000,estimated_seconds:4000,last_stop:'complete',error:''});
  if(u.pathname==='/api/sessions')return reply({sessions:[{id:'abcdef12',state:'complete',records:1200,bytes:28832,trailing_bytes:0,header_valid:true,start_unix_ms:1789150000000,synced:true},{id:'cafe1234',state:'complete',records:1300,bytes:31232,trailing_bytes:0,header_valid:true,start_unix_ms:1789150100000,synced:false}]});
  return r.fulfill({status:404,body:'nf'});});
@@ -17,6 +17,7 @@ await page.locator('.session').first().waitFor();
 assert.match(await page.locator('#cloud-state').innerText(),/正在上传/);
 assert.match(await page.locator('#cloud-detail').innerText(),/待上传 1 段/);
 assert.match(await page.locator('#cloud-detail').innerText(),/50%/);
+assert.match(await page.locator('#cloud-detail').innerText(),/仅本地旧段 1 段/);
 assert.match(await page.locator('#intro').innerText(),/自动记录/);
 assert.match(await page.locator('.session').nth(0).innerText(),/已上传网站/);
 assert.match(await page.locator('.session').nth(1).innerText(),/待回家上传/);

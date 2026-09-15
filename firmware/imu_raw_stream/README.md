@@ -4,9 +4,11 @@
 (`experiments/cloud_sync_mac.sh validate`), recording is automatic: a session starts
 ~10 s after the saved home Wi-Fi is out of reach (30 s grace after power-on), ends 15 s
 after a stable home reconnect, and every unconfirmed session is uploaded newest-first
-in resumable 16 KiB chunks with SHA-256 confirmation. Cloud-confirmed sessions are
-deleted oldest-first only when less than ~1 h of space remains. `GET /api/cloud` and
-serial `Q` report sync state; `/records` shows it with per-session badges. Without
+in resumable 16 KiB chunks with SHA-256 confirmation. When space is needed,
+cloud-confirmed sessions are deleted oldest-first. If Delta remains away long enough
+that this is not sufficient, it closes the current file, starts a new segment, and
+evicts the oldest local-only segment only as needed to keep the newest data recording.
+`GET /api/cloud` and serial `Q` report sync state; `/records` shows it with per-session badges. Without
 credentials the original record-from-power-on behavior below is unchanged. Details:
 [docs/2026-09-11_home_wifi_cloud_sync.md](../../docs/2026-09-11_home_wifi_cloud_sync.md).
 
@@ -59,8 +61,13 @@ network servicing may add timing gaps. The recorded timestamps preserve them.
 An unclosed `.open` file is retained as **interrupted** after reboot; a new file
 is created without resuming or overwriting it. Normal stops use `.bin`; full disk,
 write errors and repeated IMU failures use `.full`, `.error`, `.sensor`.
-Twenty consecutive IMU read failures stop recording. Previous recordings are
-never automatically deleted. Full storage stops capture and is reported in the UI.
+Twenty consecutive IMU read failures stop recording. With home sync configured,
+storage acts as a latest-record ring: cloud-confirmed history is discarded first;
+if that cannot make room during a long away recording, the oldest local-only
+segment is discarded and the newest segment continues. This means an exceptionally
+long trip with no return to home Wi-Fi can lose its oldest not-yet-uploaded segments.
+The current segment is never deleted while it is being written. Without home sync
+credentials, full storage still stops capture and is reported in the UI.
 
 Large transfers, directory listings and deletions are rejected with HTTP 409
 while recording, so a CSV download cannot pause an active session. Small status
@@ -85,6 +92,10 @@ supports three partitions; this firmware mounts two.
 - One hour at 20 Hz: **1,728,032 bytes** (~1.73 MB / 1.65 MiB), before filesystem overhead.
 - A 128 KiB reserve is maintained; displayed remaining time also allows 15% for
   overhead. It estimates storage capacity, **not battery life**.
+- The observed practical ceiling is about **150,000 samples / 130 minutes** in
+  one continuous segment (the 2026-09-12/13 battery recording). With ring
+  retention enabled, longer away periods are split into segments and retain the
+  newest ones instead of stopping at that boundary.
 - Existing battery logs remain in their original partition.
 - Mounting never uses destructive format-on-failure. A partition is initialized
   only after a full scan proves that every byte is erased (`0xff`). An unreadable
