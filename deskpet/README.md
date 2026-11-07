@@ -13,6 +13,8 @@ macOS-first desktop pet prototype. It runs independently of PetRing hardware.
 
 The built-in model is hand-authored from the supplied photos, including a distant standing side view. It is deliberately stylized and is not a photogrammetric reconstruction. A realistic 3D asset will need closer, level full-body views, careful sculpting and a production rig; the app does not claim to generate such a model from photos yet.
 
+Project direction: [DeskPet Proposal](PROPOSAL.md). Latest handoff: [2026-11-07 work report](docs/2026-11-07_daily_report.md).
+
 ## Build
 
 Requires macOS 14 or later and Apple Command Line Tools with Swift 5.10 or later.
