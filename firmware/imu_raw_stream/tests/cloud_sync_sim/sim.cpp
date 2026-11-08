@@ -1,6 +1,7 @@
 // Host simulation of CloudSync: default pruning removes only cloud-confirmed
 // sessions; the latest-record fallback evicts old local-only sessions only when
-// explicitly requested and never touches the active session.
+// explicitly requested and never touches the active session. retention_sim.cpp
+// then drives away()/home() over time with the real MotionLogger.
 // Build/run: sh run.sh (compiles the real src/cloud_sync.cpp and src/motion_logger.cpp).
 #include <cassert>
 #include <cstdarg>
@@ -8,6 +9,7 @@
 #include "cloud_sync.h"
 #include <mbedtls/sha256.h>
 std::map<std::string, std::string> g_files;
+void retention_scenarios();  // retention_sim.cpp
 unsigned long g_ms = 100000;
 unsigned long millis() { return g_ms; }
 void yield() {}
@@ -99,5 +101,7 @@ int main() {
   assert(fallback == 1 && !has("/10000001.bin"));
   assert(has("/20000002.bin") && has("/30000003.open"));
   assert(sync.evicted_ == 1);
+  logger.recording_ = false;
+  retention_scenarios();
   puts("SIM PASS");
 }

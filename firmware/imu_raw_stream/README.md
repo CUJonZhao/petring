@@ -4,10 +4,13 @@
 (`experiments/cloud_sync_mac.sh validate`), recording is automatic: a session starts
 ~10 s after the saved home Wi-Fi is out of reach (30 s grace after power-on), ends 15 s
 after a stable home reconnect, and every unconfirmed session is uploaded newest-first
-in resumable 16 KiB chunks with SHA-256 confirmation. When space is needed,
-cloud-confirmed sessions are deleted oldest-first. If Delta remains away long enough
-that this is not sufficient, it closes the current file, starts a new segment, and
-evicts the oldest local-only segment only as needed to keep the newest data recording.
+in resumable 16 KiB chunks with SHA-256 confirmation. Automatic sessions (and
+hand-started ones once away) are split into segments of about 512 KiB (~19 min).
+When space is needed, cloud-confirmed sessions are deleted oldest-first. Only while
+the board is confirmed away, and only if that is not sufficient, the oldest
+local-only segments are evicted so the newest data keeps recording. At home, data
+the website has not confirmed is never deleted: an indoor session is deferred or
+ended (`.full`) instead, and uploads continue.
 `GET /api/cloud` and serial `Q` report sync state; `/records` shows it with per-session badges. Without
 credentials the original record-from-power-on behavior below is unchanged. Details:
 [docs/2026-09-11_home_wifi_cloud_sync.md](../../docs/2026-09-11_home_wifi_cloud_sync.md).
@@ -62,11 +65,15 @@ An unclosed `.open` file is retained as **interrupted** after reboot; a new file
 is created without resuming or overwriting it. Normal stops use `.bin`; full disk,
 write errors and repeated IMU failures use `.full`, `.error`, `.sensor`.
 Twenty consecutive IMU read failures stop recording. With home sync configured,
-storage acts as a latest-record ring: cloud-confirmed history is discarded first;
-if that cannot make room during a long away recording, the oldest local-only
-segment is discarded and the newest segment continues. This means an exceptionally
-long trip with no return to home Wi-Fi can lose its oldest not-yet-uploaded segments.
-The current segment is never deleted while it is being written. Without home sync
+storage acts as a latest-record ring while away: cloud-confirmed history is
+discarded first; if that cannot make room during a long away recording, the oldest
+local-only ~19-minute segment is discarded and the newest segment continues. A trip
+longer than the partition holds therefore keeps roughly its newest 1.7 hours
+(host simulation of a 200-minute outing: never less than 108 minutes, without holes)
+and loses its oldest not-yet-uploaded segments. The current segment is never deleted.
+At home no unconfirmed data is deleted: a motion session starts only with 1 MiB free
+after removing confirmed history, and ends as `.full` when less than 512 KiB would
+remain; a manual start is refused with `storage_full`. Without home sync
 credentials, full storage still stops capture and is reported in the UI.
 
 Large transfers, directory listings and deletions are rejected with HTTP 409
@@ -93,9 +100,10 @@ supports three partitions; this firmware mounts two.
 - A 128 KiB reserve is maintained; displayed remaining time also allows 15% for
   overhead. It estimates storage capacity, **not battery life**.
 - The observed practical ceiling is about **150,000 samples / 130 minutes** in
-  one continuous segment (the 2026-09-12/13 battery recording). With ring
-  retention enabled, longer away periods are split into segments and retain the
-  newest ones instead of stopping at that boundary.
+  one continuous segment (the 2026-09-12/13 battery recording). With home sync
+  configured, away recordings are split into ~512 KiB segments and retain the
+  newest ones instead of stopping at that boundary. A hand-started session at home
+  stays one file (bench tests), up to about 3.6 MiB.
 - Existing battery logs remain in their original partition.
 - Mounting never uses destructive format-on-failure. A partition is initialized
   only after a full scan proves that every byte is erased (`0xff`). An unreadable
@@ -151,6 +159,8 @@ threshold summary, not a validated behavior classifier.
 ```sh
 # From the repository root; Python 3 + a C++11 compiler.
 python3 firmware/imu_raw_stream/tests/test_offline_log.py
+# Cloud sync storage rules, incl. time-driven retention scenarios:
+sh firmware/imu_raw_stream/tests/cloud_sync_sim/run.sh
 # With Playwright available to Node:
 node firmware/imu_raw_stream/tests/records_page_test.cjs
 # From this firmware directory:

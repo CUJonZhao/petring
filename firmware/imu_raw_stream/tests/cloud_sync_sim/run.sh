@@ -13,5 +13,6 @@ c++ -std=gnu++11 -fsyntax-only -Wall -I stubs -I ../../src api_check.cpp
 
 OUT="${TMPDIR:-/tmp}/delta-cloud-sync-sim"
 c++ -std=gnu++11 -Dprivate=public -Wall -Wno-unused-parameter -I stubs -I ../../src \
-  sim.cpp support.cpp ../../src/cloud_sync.cpp ../../src/motion_logger.cpp -o "$OUT"
+  sim.cpp retention_sim.cpp support.cpp motion_logger_sim.cpp ../../src/cloud_sync.cpp \
+  -o "$OUT"
 "$OUT"

@@ -129,6 +129,7 @@ bool MotionLogger::start(uint64_t unixMs, uint8_t trigger) {
   lastFlushMs_ = startedMs_;
   lastStop_ = "recording";
   error_ = "";
+  trigger_ = trigger;
   recording_ = true;
   Serial.printf("STATUS,motion_started,id=%s\n", id_.c_str());
   return true;

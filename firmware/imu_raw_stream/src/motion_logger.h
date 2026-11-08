@@ -20,6 +20,8 @@ class MotionLogger {
   void tick(uint32_t now);
   void readFailure();
   bool recording() const { return recording_; }
+  // Bytes saved in the current session file, header included.
+  size_t bytes() const { return motion::kHeaderBytes + size_t(saved_) * motion::kRecordBytes; }
   // Free space without walking the filesystem on every call (see freeBytes()).
   size_t freeBytesCached();
   bool ready() const { return ready_; }
@@ -39,6 +41,7 @@ class MotionLogger {
   motion::Buffer buffer_;
   bool ready_ = false;
   bool recording_ = false;
+  uint8_t trigger_ = 0;  // header trigger of the current/last session
   String id_;
   String error_;
   String lastStop_ = "idle";

@@ -35,6 +35,12 @@ constexpr size_t kPruneTargetBytes = 2300000;
 // During a long outing, free more space only when nearly full.
 constexpr size_t kPruneLowWaterBytes = 512 * 1024;
 constexpr size_t kPruneTopUpBytes = 1024 * 1024;
+// Sessions that may outlast storage are cut into segments of about 19 min at
+// 20 Hz, so that eviction removes the oldest segment, not the whole walk.
+constexpr size_t kSegmentMaxBytes = 512 * 1024;
+// At home nothing that has not reached the website is deleted. A new session
+// starts only with this much room; pending uploads free space once confirmed.
+constexpr size_t kHomeStartFreeBytes = kPruneTopUpBytes;
 const char* const kDataExtensions[] = {".bin", ".open", ".full", ".sensor", ".error"};
 
 bool due(uint32_t now, uint32_t at) { return !at || int32_t(now - at) >= 0; }
@@ -180,33 +186,39 @@ void CloudSync::trackMotion(uint32_t now, bool active) {
 
 bool CloudSync::startManual(uint64_t unixMs) {
   if (!enabled_) return logger_.start(unixMs, 'u');
-  if (!makeRoomForStart(kPruneTargetBytes)) {
-    error_ = "storage_full";
+  if (!makeRoomForStart(kPruneTargetBytes, confirmedAway(millis()))) {
+    logger_.error_ = "storage_full";  // shown by the phone page; nothing was deleted
     return false;
   }
   return logger_.start(unixMs, 'u');
 }
 
-bool CloudSync::makeRoomForStart(size_t targetFree) {
+bool CloudSync::confirmedAway(uint32_t now) const {
+  return !atHome_ && awaySince_ && now >= kBootGraceMs && now - awaySince_ >= kLeaveDebounceMs;
+}
+
+bool CloudSync::makeRoomForStart(size_t targetFree, bool away) {
   prune(targetFree);
-  // Starting a new segment is the safe point to make the requested
-  // latest-record retention trade-off: do not fail the new record merely
-  // because old local-only sessions have not reached home Wi-Fi yet.
-  if (logger_.freeBytes() < motion::kReserveBytes + 4096) prune(targetFree, true);
+  if (!away) return logger_.freeBytes() >= kHomeStartFreeBytes;
+  // Away from home the newest recording wins: rather than fail to record,
+  // evict old local-only segments, oldest first. The rest is left to
+  // maintainRecordingSpace() while the session runs.
+  if (logger_.freeBytes() < kPruneLowWaterBytes) prune(kPruneTopUpBytes, true);
   return logger_.freeBytes() >= motion::kReserveBytes + 4096;
 }
 
-bool CloudSync::rollover(uint32_t now, uint8_t trigger) {
+bool CloudSync::rollover(uint32_t now, bool away) {
   // One file cannot discard its own head safely. End it cleanly, protect that
   // newest closed segment, free older history if necessary, then continue in a
-  // new segment. The website receives the segments newest-first on return home.
+  // new segment with the same trigger. The website groups adjacent segments.
   const String preserve = logger_.id_;
+  const uint8_t trigger = logger_.trigger_;
   if (!logger_.stop("complete")) {
     error_ = "record_rollover_finalize_failed";
     return false;
   }
   prune(kPruneTopUpBytes);
-  if (logger_.freeBytes() < kPruneTopUpBytes) prune(kPruneTopUpBytes, true, preserve);
+  if (away && logger_.freeBytes() < kPruneLowWaterBytes) prune(kPruneTopUpBytes, true, preserve);
   if (!logger_.start(unixMs(), trigger)) {
     error_ = "record_rollover_start_failed_" + logger_.error_;
     return false;
@@ -216,13 +228,26 @@ bool CloudSync::rollover(uint32_t now, uint8_t trigger) {
   return true;
 }
 
-bool CloudSync::maintainRecordingSpace(uint32_t now, uint8_t trigger) {
+bool CloudSync::maintainRecordingSpace(uint32_t now, bool away) {
   if (now - lastPruneCheck_ < kPruneCheckMs) return true;
   lastPruneCheck_ = now;
+  // Bounded segments for anything that may outlast storage: automatic
+  // sessions, and hand-started ones once carried away. A hand-started session
+  // at home (bench tests) stays one file.
+  const bool automatic = logger_.trigger_ == 'w' || logger_.trigger_ == 'm';
+  if ((automatic || away) && logger_.bytes() >= kSegmentMaxBytes && !rollover(now, away)) return false;
   if (logger_.freeBytesCached() >= kPruneLowWaterBytes) return true;
   prune(kPruneTopUpBytes);
-  if (logger_.freeBytes() < kPruneLowWaterBytes) prune(kPruneTopUpBytes, true);
-  return logger_.freeBytes() >= kPruneLowWaterBytes || rollover(now, trigger);
+  if (logger_.freeBytes() >= kPruneLowWaterBytes) return true;
+  if (!away) {
+    // Only data the website does not have yet is left. Keep all of it: end this
+    // session while it still saves cleanly, so uploads can resume.
+    if (!logger_.stop("storage_full")) error_ = "record_finalize_failed";
+    Serial.println("STATUS,home_session_ended_storage");
+    return true;
+  }
+  prune(kPruneTopUpBytes, true);
+  return logger_.freeBytes() >= kPruneLowWaterBytes || rollover(now, true);
 }
 
 bool CloudSync::sustainedMotion(uint32_t now) const {
@@ -244,7 +269,7 @@ void CloudSync::away(uint32_t now, bool imuReady) {
   if (wasRecording_ && !recording && logger_.lastStop_ == "complete") holdUntilHome_ = true;
   if (recording) {
     mode_ = "recording";
-    if (!maintainRecordingSpace(now, 'w')) {
+    if (!maintainRecordingSpace(now, confirmedAway(now))) {
       mode_ = "error";
       startRetryAt_ = after(now, kStartRetryMs);
     }
@@ -264,7 +289,7 @@ void CloudSync::away(uint32_t now, bool imuReady) {
     return;
   }
   if (!due(now, startRetryAt_)) return;
-  if (makeRoomForStart(kPruneTargetBytes) && logger_.start(unixMs(), 'w')) {
+  if (makeRoomForStart(kPruneTargetBytes, true) && logger_.start(unixMs(), 'w')) {
     mode_ = "recording";
     error_ = "";
     startRetryAt_ = 0;
@@ -294,9 +319,13 @@ void CloudSync::home(uint32_t now, bool imuReady, float voltage) {
     // while, because an outing can stay inside home Wi-Fi the whole time. A
     // session the user started by hand stays under their control.
     mode_ = startedByMotion_ ? "recording" : "home_recording";
-    if (!maintainRecordingSpace(now, startedByMotion_ ? 'm' : 'u')) {
+    if (!maintainRecordingSpace(now, false)) {
       mode_ = "error";
       motionSuppressUntil_ = after(now, kStartRetryMs);
+      return;
+    }
+    if (!logger_.recording()) {  // ended to protect pending uploads
+      startedByMotion_ = false;
       return;
     }
     if (startedByMotion_ && stillFor(now, kStillStopMs)) {
@@ -312,18 +341,23 @@ void CloudSync::home(uint32_t now, bool imuReady, float voltage) {
   }
   // Worn and moving while still in range: record the outing anyway.
   if (imuReady && due(now, motionSuppressUntil_) && sustainedMotion(now)) {
-    if (makeRoomForStart(kPruneTargetBytes) && logger_.start(unixMs(), 'm')) {
+    if (!makeRoomForStart(kPruneTargetBytes, false)) {
+      // Pending uploads hold the space; keep syncing and try again later.
+      motionSuppressUntil_ = after(now, kStartRetryMs);
+      Serial.println("STATUS,motion_start_deferred_storage");
+    } else if (logger_.start(unixMs(), 'm')) {
       startedByMotion_ = true;
       mode_ = "recording";
       error_ = "";
       lastPruneCheck_ = now;
       Serial.println("STATUS,motion_session_started");
       return;
+    } else {
+      mode_ = "error";
+      error_ = "record_start_failed_" + logger_.error_;
+      motionSuppressUntil_ = after(now, kStartRetryMs);
+      return;
     }
-    mode_ = "error";
-    error_ = "record_start_failed_" + logger_.error_;
-    motionSuppressUntil_ = after(now, kStartRetryMs);
-    return;
   }
   if (!unixMs()) {
     mode_ = "waiting_clock";

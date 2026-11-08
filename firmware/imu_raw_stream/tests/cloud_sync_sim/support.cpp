@@ -4,7 +4,8 @@
 #include "esp_system.h"
 const esp_partition_t* esp_partition_find_first(esp_partition_type_t, esp_partition_subtype_t, const char*) { return nullptr; }
 esp_err_t esp_partition_read(const esp_partition_t*, size_t, void*, size_t) { return 0; }
-uint32_t esp_random(void) { return 0x12345678; }
+// Increasing ids: sessions started later also sort later.
+uint32_t esp_random(void) { static uint32_t n = 0x10000000; return n += 0x00010001; }
 void WebServer::send(int, const char*, const String&) {} void WebServer::sendHeader(const String&, const String&, bool) {}
 String WebServer::arg(const String&) { return String(); } void WebServer::setContentLength(const size_t) {}
 void WebServer::sendContent(const String&) {} WiFiClient WebServer::client() { return WiFiClient(); }

@@ -18,9 +18,9 @@ claiming dog walk/run recognition. See [today's report](docs/2026-09-15_daily_re
 [long battery recording](experiments/battery_recorded_long_2026-09-13.md) ·
 [Home Wi-Fi auto sync / 回家自动同步](docs/2026-09-11_home_wifi_cloud_sync.md).
 The board records by itself away from home Wi-Fi, closes the session after it reconnects,
-uploads it to the private site, and keeps the newest segments when storage is full:
-it deletes cloud-confirmed history first, then only the oldest local-only segment
-if that is needed for recording to continue.
+uploads it to the private site, and keeps the newest ~19-minute segments when storage
+is full away from home: it deletes cloud-confirmed history first, then only the oldest
+local-only segment. At home it never deletes data the site has not confirmed.
 **Validated on the board (2026-09-11):** the loop now runs unattended. A session
 started from movement alone while still on home Wi-Fi, ended itself after five minutes
 of stillness, uploaded, and appeared on the private site: 6,724 samples at 19.53 Hz.

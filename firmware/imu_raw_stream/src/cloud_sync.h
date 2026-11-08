@@ -9,9 +9,11 @@
 // Home Wi-Fi sync. While the saved home network is out of reach the board
 // records by itself; after a stable home connection it closes that session
 // and uploads every session the website has not yet confirmed, in resumable
-// 16 KiB chunks. When space is needed, cloud-confirmed sessions go first. If
-// the device is still away and would otherwise stop, older local-only segments
-// are then evicted oldest-first so the most recent recording can continue.
+// 16 KiB chunks. Sessions that may outlast storage (automatic ones, and
+// hand-started ones once away) are split into bounded segments. When
+// space is needed, cloud-confirmed sessions go first. Only while confirmed
+// away are older local-only segments then evicted, oldest first, so the most
+// recent recording can continue; at home unsent data is never deleted.
 class CloudSync {
  public:
   explicit CloudSync(MotionLogger& logger) : logger_(logger) {}
@@ -54,9 +56,10 @@ class CloudSync {
   bool hashFile();
   size_t prune(size_t targetFree, bool allowLocalOnly = false,
                const String& preserve = String());
-  bool makeRoomForStart(size_t targetFree);
-  bool maintainRecordingSpace(uint32_t now, uint8_t trigger);
-  bool rollover(uint32_t now, uint8_t trigger);
+  bool confirmedAway(uint32_t now) const;
+  bool makeRoomForStart(size_t targetFree, bool away);
+  bool maintainRecordingSpace(uint32_t now, bool away);
+  bool rollover(uint32_t now, bool away);
   void clearMarkers(const char* ext);
   void markFile(const char* ext);
   void markDone();
