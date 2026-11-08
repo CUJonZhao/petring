@@ -74,6 +74,7 @@ struct PetSceneView: NSViewRepresentable {
                 for child in model.rootNode.childNodes { wrapper.addChildNode(child.clone()) }
                 actor.addChildNode(wrapper)
                 actor.scale = SCNVector3(0.83, 0.83, 0.83)
+                configureFurMaterials(in: wrapper)
                 bindDeltaRig()
             } else {
                 buildDemoDog(in: actor)
@@ -251,6 +252,30 @@ struct PetSceneView: NSViewRepresentable {
             }
         }
 
+        /// Hair cards ("fur_*" meshes/materials) are alpha-cut sheets: draw both sides,
+        /// discard transparent texels and keep depth writes so thousands of cards sort correctly.
+        private func configureFurMaterials(in root: SCNNode) {
+            root.enumerateHierarchy { node, _ in
+                guard let geometry = node.geometry else { return }
+                let nodeIsFur = (node.name ?? "").hasPrefix("fur_")
+                for material in geometry.materials
+                where nodeIsFur || (material.name ?? "").hasPrefix("fur_") {
+                    material.isDoubleSided = true
+                    if material.transparent.contents == nil {
+                        material.transparent.contents = material.diffuse.contents
+                    }
+                    material.transparencyMode = .aOne
+                    material.blendMode = .replace
+                    material.writesToDepthBuffer = true
+                    material.readsFromDepthBuffer = true
+                    material.shaderModifiers = [.fragment: """
+                        if (_output.color.a < 0.5) { discard_fragment(); }
+                        _output.color.a = 1.0;
+                        """]
+                }
+            }
+        }
+
         private func bindDeltaRig() {
             func named(_ name: String) -> SCNNode? {
                 actor.childNode(withName: name, recursively: true)
@@ -282,7 +307,7 @@ struct PetSceneView: NSViewRepresentable {
             head?.eulerAngles = SCNVector3Zero
             tail?.eulerAngles = SCNVector3Zero
             rigJaw?.eulerAngles = SCNVector3Zero
-            tongue?.position = SCNVector3(0, -0.57, -0.28)
+            tongue?.position = SCNVector3(0, -0.35, -0.115)
             tongue?.opacity = 0
             waterBowl?.opacity = 0
             waterRipple?.opacity = 0

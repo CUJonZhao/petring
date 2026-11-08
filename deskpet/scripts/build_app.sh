@@ -3,6 +3,8 @@ set -eu
 cd "$(dirname "$0")/.."
 xcrun swift build -c release
 APP=".build/DeskPet.app"
+# Recreate the bundle: overwriting a launched binary in place breaks its code signature cache.
+rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources"
 cp .build/release/DeskPet "$APP/Contents/MacOS/DeskPet"
@@ -20,4 +22,5 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
+codesign --force --sign - "$APP" >/dev/null 2>&1 || true
 echo "Built $APP"
